@@ -1,0 +1,70 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href="<%= home %>" class="brand" aria-label="Pro Teach">
+        <img src="/img/logo-light.png" alt="Pro Teach" width="203" height="71" class="brand-logo" loading="lazy">
+      </a>
+      <p><%= t('footer.about') %></p>
+      <% if (contacts.socials.length) { %>
+      <ul class="social-list">
+        <% contacts.socials.forEach(function (s) { %>
+        <li><a href="<%= s.url %>" target="_blank" rel="noopener" aria-label="<%= s.label %>"><%- h.icon(s.icon) %></a></li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+
+    <nav class="footer-col" aria-label="<%= t('footer.quick') %>">
+      <h2 class="footer-title"><%= t('footer.quick') %></h2>
+      <ul>
+        <li><a href="<%= home %>"><%= t('nav.home') %></a></li>
+        <li><a href="<%= home %>#about"><%= t('nav.about') %></a></li>
+        <li><a href="<%= home %>#courses"><%= t('nav.courses') %></a></li>
+        <li><a href="<%= home %>#contact"><%= t('nav.contact') %></a></li>
+        <li><a href="<%= page === 'course' ? '#apply' : home + '#apply' %>"><%= t('nav.apply') %></a></li>
+      </ul>
+    </nav>
+
+    <div class="footer-col">
+      <h2 class="footer-title"><%= t('footer.contact') %></h2>
+      <ul class="footer-contacts">
+        <% contacts.phones.forEach(function (p) { %>
+        <li><a href="<%= p.href %>"><%- h.icon('phone') %><span><%= p.display %></span></a></li>
+        <% }) %>
+        <% if (contacts.email) { %>
+        <li><a href="mailto:<%= contacts.email %>"><%- h.icon('mail') %><span><%= contacts.email %></span></a></li>
+        <% } %>
+        <% if (contacts.address) { %>
+        <li><span class="footer-contact-row"><%- h.icon('map-pin') %><span><%= contacts.address %></span></span></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© <%= h.year() %> Pro Teach. <%= t('footer.rights') %></p>
+    <div class="footer-langs">
+      <% langs.forEach(function (l) { %>
+      <a href="<%= alternates[l] %>" hreflang="<%= l %>" lang="<%= l %>"<%- l === lang ? ' aria-current="true"' : '' %>><%= langNames[l] %></a>
+      <% }) %>
+    </div>
+  </div>
+</footer>
+
+<% if (contacts.phones.length) { %>
+<div class="quick-call" data-quick-call>
+  <% if (contacts.phones.length === 1) { %>
+  <a class="quick-call-btn" href="<%= contacts.phones[0].href %>"><%- h.icon('phone') %><span><%= t('floating.call') %></span></a>
+  <% } else { %>
+  <details class="quick-call-menu">
+    <summary class="quick-call-btn"><%- h.icon('phone') %><span><%= t('floating.call') %></span></summary>
+    <div class="quick-call-list" role="list">
+      <p class="quick-call-title"><%= t('floating.choose') %></p>
+      <% contacts.phones.forEach(function (p) { %>
+      <a role="listitem" href="<%= p.href %>"><%- h.icon('phone') %><%= p.display %></a>
+      <% }) %>
+    </div>
+  </details>
+  <% } %>
+</div>
+<% } %>

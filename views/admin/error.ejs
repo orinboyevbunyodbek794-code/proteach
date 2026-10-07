@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= code %> — Pro Teach admin</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="<%= h.asset('/css/admin.css') %>">
+</head>
+<body class="auth">
+  <main class="auth-card auth-card--center">
+    <p class="error-num"><%= code %></p>
+    <h1><%= title %></h1>
+    <p class="muted"><%= text %></p>
+    <div class="row-actions row-actions--center">
+      <a class="btn btn-primary" href="/admin"><%- h.icon('dashboard') %> Dashboard</a>
+      <a class="btn btn-light" href="/uz/">Saytga o'tish</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <meta name="theme-color" content="#0d0d0f">
+  <title><%= title %> — Pro Teach admin</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="<%= h.asset('/css/admin.css') %>">
+  <script src="<%= h.asset('/js/admin.js') %>" defer></script>
+</head>
+<body class="admin">
+<a class="skip-link" href="#content">Asosiy qismga o'tish</a>
+<div class="shell">
+  <aside class="sidebar" id="sidebar" data-sidebar>
+    <div class="sidebar-head">
+      <a class="sidebar-brand" href="/admin" aria-label="Pro Teach admin">
+        <img src="/img/logo-light.png" alt="Pro Teach" width="203" height="71">
+        <span class="brand-tag">Admin</span>
+      </a>
+      <button class="icon-btn sidebar-close" type="button" data-sidebar-close aria-label="Menyuni yopish"><%- h.icon('x') %></button>
+    </div>
+    <nav class="side-nav" aria-label="Admin menyusi">
+      <% var items = [
+        ['dashboard', '/admin', 'dashboard', 'Dashboard'],
+        ['applications', '/admin/applications', 'inbox', 'Arizalar'],
+        ['courses', '/admin/courses', 'book', 'Kurslar'],
+        ['video', '/admin/video', 'video', 'Video'],
+        ['contacts', '/admin/contacts', 'phone', "Bog'lanish"],
+        ['content', '/admin/content', 'type', 'Sayt matnlari'],
+        ['settings', '/admin/settings', 'settings', 'Sozlamalar']
+      ]; %>
+      <% items.forEach(function (it) { %>
+      <a href="<%= it[1] %>" class="side-link<%= active === it[0] ? ' is-active' : '' %>"<%- active === it[0] ? ' aria-current="page"' : '' %>>
+        <%- h.icon(it[2]) %><span><%= it[3] %></span>
+        <% if (it[0] === 'applications') { %>
+        <span class="badge-new" data-new-badge <%- newCount ? '' : 'hidden' %> aria-label="<%= newCount %> ta yangi ariza"><%= newCount %></span>
+        <% } %>
+      </a>
+      <% }) %>
+    </nav>
+    <div class="sidebar-foot">
+      <a class="side-link side-link--muted" href="/uz/" target="_blank" rel="noopener"><%- h.icon('external') %><span>Saytni ochish</span></a>
+      <div class="me">
+        <span class="me-avatar" aria-hidden="true"><%= admin.username.slice(0, 1).toUpperCase() %></span>
+        <span class="me-name"><%= admin.username %></span>
+        <form method="post" action="/admin/logout">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="icon-btn" type="submit" title="Chiqish" aria-label="Chiqish"><%- h.icon('logout') %></button>
+        </form>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" data-sidebar-close></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" type="button" data-sidebar-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Menyu"><%- h.icon('menu') %></button>
+      <a class="topbar-brand" href="/admin"><img src="/img/logo-light.png" alt="Pro Teach" width="203" height="71"></a>
+      <a class="topbar-badge" href="/admin/applications?status=new" data-new-badge-wrap <%- newCount ? '' : 'hidden' %>>
+        <%- h.icon('bell') %><span data-new-badge-count><%= newCount %></span>
+      </a>
+    </header>
+
+    <main class="content" id="content">
+      <% if (flash && flash.length) { %>
+      <div class="flash-stack">
+        <% flash.forEach(function (f) { %>
+        <div class="flash flash--<%= f.type === 'error' ? 'error' : 'success' %>" role="<%= f.type === 'error' ? 'alert' : 'status' %>" data-flash>
+          <%- h.icon(f.type === 'error' ? 'alert' : 'check-circle') %>
+          <span><%= f.message %></span>
+          <button class="flash-close" type="button" aria-label="Yopish" data-flash-close><%- h.icon('x') %></button>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>

@@ -1,0 +1,96 @@
+<%- include('partials/top') %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Video</h1>
+    <p class="muted">O'quv markazi haqidagi video bosh sahifadagi «Markaz bilan tanishing» bo'limida chiqadi. Video yuklanmagan yoki yashirilgan bo'lsa, bo'lim ko'rinmaydi.</p>
+  </div>
+</div>
+
+<div class="video-admin-grid">
+  <section class="card" aria-labelledby="v-current">
+    <div class="card-head">
+      <h2 class="card-title" id="v-current">Joriy video</h2>
+      <% if (video.file) { %>
+      <span class="status <%= video.visible ? 'status--accepted' : 'status--rejected' %>"><%= video.visible ? "Saytda ko'rinadi" : 'Yashirilgan' %></span>
+      <% } %>
+    </div>
+    <% if (video.file) { %>
+    <div class="video-preview">
+      <video controls preload="metadata" playsinline<% if (posterUrl) { %> poster="<%= posterUrl %>"<% } %>>
+        <source src="<%= videoUrl %>" type="<%= video.mime %>">
+      </video>
+    </div>
+    <dl class="meta-list">
+      <div><dt>Format</dt><dd><%= video.mime.replace('video/', '').toUpperCase() %></dd></div>
+      <div><dt>Hajmi</dt><dd><%= (video.size / 1048576).toFixed(1) %> MB</dd></div>
+      <% if (video.uploadedAt) { %><div><dt>Yuklangan</dt><dd><%= h.formatDateTime(video.uploadedAt) %></dd></div><% } %>
+    </dl>
+    <div class="row-actions">
+      <form method="post" action="/admin/video/visibility">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="visible" value="<%= video.visible ? '0' : '1' %>">
+        <button class="btn <%= video.visible ? 'btn-light' : 'btn-primary' %>" type="submit">
+          <%- h.icon(video.visible ? 'eye-off' : 'eye') %> <%= video.visible ? 'Saytdan yashirish' : "Saytda ko'rsatish" %>
+        </button>
+      </form>
+      <form method="post" action="/admin/video/delete" data-confirm="Video butunlay o'chiriladi va saytdagi video bo'limi yo'qoladi.">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger-ghost" type="submit"><%- h.icon('trash') %> Videoni o'chirish</button>
+      </form>
+    </div>
+    <% } else { %>
+    <div class="empty"><%- h.icon('video') %><p>Video hali yuklanmagan. Saytda video bo'limi ko'rinmaydi.</p></div>
+    <% } %>
+  </section>
+
+  <div class="stack">
+    <section class="card" aria-labelledby="v-upload">
+      <h2 class="card-title" id="v-upload"><%= video.file ? 'Videoni almashtirish' : 'Video yuklash' %></h2>
+      <form method="post" enctype="multipart/form-data" action="/admin/video/upload?_csrf=<%= encodeURIComponent(csrfToken) %>" data-video-upload data-max-mb="<%= maxVideoMb %>">
+        <label class="dropzone" data-dropzone>
+          <input type="file" name="video" accept="video/mp4,video/webm,.mp4,.webm,.m4v" required data-video-input>
+          <%- h.icon('upload') %>
+          <strong data-file-name>Video faylni tanlang yoki shu yerga tashlang</strong>
+          <span class="muted small">MP4 yoki WEBM · maksimal <%= maxVideoMb %> MB</span>
+        </label>
+        <div class="progress" data-progress hidden>
+          <div class="progress-bar"><span data-progress-bar></span></div>
+          <div class="progress-meta"><span data-progress-text>0%</span><span data-progress-size></span></div>
+        </div>
+        <p class="field-error" data-upload-error hidden></p>
+        <div class="row-actions">
+          <button class="btn btn-primary" type="submit" data-upload-btn><%- h.icon('upload') %> Yuklash</button>
+          <button class="btn btn-light" type="button" data-upload-cancel hidden>Bekor qilish</button>
+        </div>
+        <p class="hint">Maslahat: tez yuklanishi uchun videoni 1080p yoki 720p sifatda, H.264 (MP4) formatida tayyorlang.</p>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="v-poster">
+      <h2 class="card-title" id="v-poster">Poster rasm <span class="muted small">(ixtiyoriy)</span></h2>
+      <p class="hint">Video boshlanishidan oldin ko'rinadigan muqova rasmi.</p>
+      <% if (posterUrl) { %>
+      <div class="poster-preview"><img src="<%= posterUrl %>" alt="Joriy poster" loading="lazy"></div>
+      <% } %>
+      <form method="post" enctype="multipart/form-data" action="/admin/video/poster?_csrf=<%= encodeURIComponent(csrfToken) %>" class="form-stack">
+        <div class="field">
+          <label for="poster"><%= posterUrl ? 'Posterni almashtirish' : 'Poster yuklash' %></label>
+          <input id="poster" type="file" name="poster" accept="image/jpeg,image/png,image/webp" required>
+          <p class="hint">JPG, PNG yoki WEBP, <%= maxImageMb %> MB gacha. Tavsiya: 1280×720.</p>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-dark" type="submit"><%- h.icon('image') %> Saqlash</button>
+        </div>
+      </form>
+      <% if (posterUrl) { %>
+      <form method="post" action="/admin/video/poster/delete" data-confirm="Poster rasmi o'chiriladi.">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger-ghost btn-sm" type="submit"><%- h.icon('trash') %> Posterni o'chirish</button>
+      </form>
+      <% } %>
+    </section>
+  </div>
+</div>
+
+<%- include('partials/bottom') %>

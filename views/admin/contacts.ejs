@@ -1,0 +1,115 @@
+<%- include('partials/top') %>
+<% function err(k) { return errors[k] ? '<p class="field-error">' + h.escapeHtml(errors[k]) + '</p>' : ''; } %>
+<% var langs = [['uz', "O'zbekcha"], ['ru', 'Ruscha'], ['en', 'Inglizcha']]; %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Bog'lanish ma'lumotlari</h1>
+    <p class="muted">Saqlangan zahoti saytdagi header, «Bog'lanish» bo'limi, footer va qo'ng'iroq tugmasida yangilanadi.</p>
+  </div>
+</div>
+
+<% if (Object.keys(errors).length) { %>
+<div class="notice notice--error"><%- h.icon('alert') %><span>Ma'lumotlar saqlanmadi — belgilangan maydonlarni tekshiring.</span></div>
+<% } %>
+
+<form method="post" action="/admin/contacts" class="settings-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <div class="form-grid form-grid--even">
+    <section class="card" aria-labelledby="c-phones">
+      <h2 class="card-title" id="c-phones">Telefon raqamlar</h2>
+      <p class="hint">Birinchi raqam asosiy hisoblanadi (tezkor qo'ng'iroq tugmasi). Tartibni ↑ ↓ bilan o'zgartiring.</p>
+      <ul class="repeat-list" data-repeat="phones">
+        <% (c.phonesDisplay.length ? c.phonesDisplay : ['']).forEach(function (p) { %>
+        <li class="repeat-row" data-repeat-row>
+          <input type="tel" name="phones" value="<%= p %>" placeholder="+998 90 123 45 67" inputmode="tel" maxlength="20" aria-label="Telefon raqam">
+          <button class="icon-btn icon-btn--light" type="button" data-row-up aria-label="Yuqoriga"><%- h.icon('arrow-up') %></button>
+          <button class="icon-btn icon-btn--light" type="button" data-row-down aria-label="Pastga"><%- h.icon('arrow-down') %></button>
+          <button class="icon-btn icon-btn--danger" type="button" data-row-remove aria-label="O'chirish"><%- h.icon('trash') %></button>
+        </li>
+        <% }) %>
+      </ul>
+      <%- err('phones') %>
+      <button class="btn btn-light btn-sm" type="button" data-repeat-add="phones"><%- h.icon('plus') %> Raqam qo'shish</button>
+      <template data-repeat-template="phones">
+        <li class="repeat-row" data-repeat-row>
+          <input type="tel" name="phones" value="" placeholder="+998 90 123 45 67" inputmode="tel" maxlength="20" aria-label="Telefon raqam">
+          <button class="icon-btn icon-btn--light" type="button" data-row-up aria-label="Yuqoriga"><%- h.icon('arrow-up') %></button>
+          <button class="icon-btn icon-btn--light" type="button" data-row-down aria-label="Pastga"><%- h.icon('arrow-down') %></button>
+          <button class="icon-btn icon-btn--danger" type="button" data-row-remove aria-label="O'chirish"><%- h.icon('trash') %></button>
+        </li>
+      </template>
+
+      <div class="field field--spaced">
+        <label for="email">Email <span class="muted small">(ixtiyoriy)</span></label>
+        <input id="email" name="email" type="email" maxlength="120" value="<%= c.email %>" placeholder="info@proteach.uz">
+        <%- err('email') %>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="c-social">
+      <h2 class="card-title" id="c-social">Ijtimoiy tarmoqlar</h2>
+      <p class="hint">To'liq havola yoki @username kiriting. Bo'sh qolganlari saytda ko'rinmaydi.</p>
+      <% [['instagram', 'Instagram', 'instagram', '@proteachuz'], ['telegram', 'Telegram', 'telegram', '@proteachuz yoki https://t.me/...'], ['facebook', 'Facebook', 'facebook', 'https://facebook.com/...'], ['youtube', 'YouTube', 'youtube', 'https://youtube.com/@...']].forEach(function (s) { %>
+      <div class="field">
+        <label for="<%= s[0] %>"><%- h.icon(s[2]) %> <%= s[1] %></label>
+        <input id="<%= s[0] %>" name="<%= s[0] %>" type="text" maxlength="300" value="<%= c[s[0]] %>" placeholder="<%= s[3] %>">
+        <%- err(s[0]) %>
+      </div>
+      <% }) %>
+    </section>
+  </div>
+
+  <section class="card" aria-labelledby="c-address">
+    <h2 class="card-title" id="c-address">Manzil va ish vaqti</h2>
+    <div class="tri-grid">
+      <% langs.forEach(function (l) { %>
+      <div class="tri-col">
+        <p class="panel-lang"><%= l[1] %></p>
+        <div class="field">
+          <label for="address_<%= l[0] %>">Manzil<% if (l[0] === 'uz') { %> <span class="req">*</span><% } %></label>
+          <textarea id="address_<%= l[0] %>" name="address_<%= l[0] %>" rows="2" maxlength="200"><%= c.address[l[0]] %></textarea>
+          <%- err('address_' + l[0]) %>
+        </div>
+        <div class="field">
+          <label for="hours_<%= l[0] %>">Ish vaqti</label>
+          <textarea id="hours_<%= l[0] %>" name="hours_<%= l[0] %>" rows="2" maxlength="200"><%= c.hours[l[0]] %></textarea>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="c-map">
+    <h2 class="card-title" id="c-map">Xarita</h2>
+    <div class="form-grid form-grid--even">
+      <div>
+        <div class="field">
+          <label for="map_link">«Xaritada ochish» havolasi</label>
+          <input id="map_link" name="map_link" type="url" maxlength="500" value="<%= c.mapLink %>" placeholder="https://yandex.ru/maps/org/...">
+          <%- err('map_link') %>
+        </div>
+        <div class="field">
+          <label for="map_embed">Saytga joylanadigan xarita (embed)</label>
+          <textarea id="map_embed" name="map_embed" rows="3" maxlength="2000" placeholder="https://yandex.ru/map-widget/v1/?oid=...  yoki to'liq &lt;iframe&gt; kodi"><%= c.mapEmbed %></textarea>
+          <p class="hint">Yandex Xaritada tashkilot sahifasi → «Поделиться» → «Виджет с картой» kodini to'liq qo'yishingiz mumkin — havola avtomatik ajratib olinadi. Faqat Yandex va Google xaritalari qabul qilinadi.</p>
+          <%- err('map_embed') %>
+        </div>
+      </div>
+      <div class="map-preview">
+        <% if (c.mapEmbed && !errors.map_embed) { %>
+        <iframe src="<%= c.mapEmbed %>" title="Xarita ko'rinishi" loading="lazy"></iframe>
+        <% } else { %>
+        <div class="empty"><%- h.icon('map-pin') %><p>Embed havolasi kiritilmagan</p></div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <div class="form-bar">
+    <button class="btn btn-primary" type="submit"><%- h.icon('check') %> Saqlash</button>
+  </div>
+</form>
+
+<%- include('partials/bottom') %>

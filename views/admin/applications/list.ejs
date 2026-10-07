@@ -1,0 +1,140 @@
+<%- include('../partials/top') %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Arizalar</h1>
+    <p class="muted">Kursga yozilganlar ro'yxati. Holatni o'zgartirish uchun ro'yxatdagi tanlovdan foydalaning.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-light" href="/admin/applications/export.csv<%= qs({ page: '' }) %>"><%- h.icon('download') %> CSV</a>
+    <a class="btn btn-primary" href="/admin/applications/export.xlsx<%= qs({ page: '' }) %>"><%- h.icon('download') %> Excel</a>
+  </div>
+</div>
+
+<nav class="status-tabs" aria-label="Holat bo'yicha">
+  <a href="/admin/applications<%= qs({ status: '', page: '' }) %>" class="<%= !filters.status ? 'is-active' : '' %>">Barchasi <span><%= counts.all %></span></a>
+  <% STATUSES.forEach(function (s) { %>
+  <a href="/admin/applications<%= qs({ status: s, page: '' }) %>" class="<%= filters.status === s ? 'is-active' : '' %>"><i class="status-dot status-dot--<%= s %>"></i><%= STATUS_LABELS[s] %> <span><%= counts[s] %></span></a>
+  <% }) %>
+</nav>
+
+<form class="filters card" method="get" action="/admin/applications" role="search">
+  <div class="field field--grow">
+    <label for="q">Qidiruv</label>
+    <div class="input-icon">
+      <%- h.icon('search') %>
+      <input id="q" name="q" type="search" value="<%= filters.q %>" placeholder="Ism yoki telefon raqam" maxlength="80">
+    </div>
+  </div>
+  <div class="field">
+    <label for="course">Kurs</label>
+    <select id="course" name="course">
+      <option value="">Barcha kurslar</option>
+      <% courseOptions.forEach(function (c) { %>
+      <option value="<%= c.id %>"<%- String(c.id) === filters.course ? ' selected' : '' %>><%= c.name.uz %><%= c.isActive ? '' : ' (nofaol)' %></option>
+      <% }) %>
+      <option value="deleted"<%- filters.course === 'deleted' ? ' selected' : '' %>>O'chirilgan kurslar</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="status">Holat</label>
+    <select id="status" name="status">
+      <option value="">Barcha holatlar</option>
+      <% STATUSES.forEach(function (s) { %>
+      <option value="<%= s %>"<%- filters.status === s ? ' selected' : '' %>><%= STATUS_LABELS[s] %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="field">
+    <label for="sort">Saralash</label>
+    <select id="sort" name="sort">
+      <option value="new"<%- filters.sort === 'new' ? ' selected' : '' %>>Avval yangilari</option>
+      <option value="old"<%- filters.sort === 'old' ? ' selected' : '' %>>Avval eskilari</option>
+    </select>
+  </div>
+  <div class="filters-actions">
+    <button class="btn btn-dark" type="submit"><%- h.icon('search') %> Filtrlash</button>
+    <% if (filters.q || filters.course || filters.status || filters.sort !== 'new') { %>
+    <a class="btn btn-light" href="/admin/applications">Tozalash</a>
+    <% } %>
+  </div>
+</form>
+
+<section class="card card--flush">
+  <div class="card-head card-head--pad">
+    <p class="muted small">Topildi: <strong><%= result.total %></strong> ta ariza<% if (result.pages > 1) { %> · <%= result.page %>/<%= result.pages %>-sahifa<% } %></p>
+  </div>
+  <% if (result.rows.length) { %>
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead>
+        <tr><th>Sana</th><th>Ism-familiya</th><th>Telefon</th><th>Kurs</th><th>Til</th><th>Holat</th><th><span class="sr-only">Amallar</span></th></tr>
+      </thead>
+      <tbody>
+        <% result.rows.forEach(function (a) { %>
+        <tr class="<%= a.status === 'new' ? 'row-new' : '' %>">
+          <td data-label="Sana" class="nowrap"><%= h.formatDateTime(a.created_at) %><span class="row-sub">#<%= a.id %></span></td>
+          <td data-label="Ism">
+            <a class="row-title" href="/admin/applications/<%= a.id %>?back=<%= encodeURIComponent(returnTo) %>"><%= a.name %></a>
+            <% if (a.comment) { %><span class="row-sub" title="<%= a.comment %>"><%- h.icon('message') %><%= h.truncate(a.comment, 60) %></span><% } %>
+          </td>
+          <td data-label="Telefon" class="nowrap">
+            <a class="tel" href="<%= h.telHref(a.phone) %>"><%- h.icon('phone') %><%= h.formatPhone(a.phone) %></a>
+            <% if (a.is_duplicate) { %><span class="tag tag--warn" title="Bu raqamdan 24 soat ichida boshqa ariza ham kelgan">Takroriy</span><% } %>
+          </td>
+          <td data-label="Kurs">
+            <%= a.course_name_snapshot || '—' %>
+            <% if (!a.course_id) { %><span class="tag">o'chirilgan</span><% } %>
+            <% if (a.category) { %><span class="row-sub"><%= CATEGORY_LABELS[a.category] %></span><% } %>
+          </td>
+          <td data-label="Til"><span class="lang-tag"><%= a.lang.toUpperCase() %></span></td>
+          <td data-label="Holat">
+            <form method="post" action="/admin/applications/<%= a.id %>/status" class="status-form" data-status-form>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="back" value="<%= returnTo %>">
+              <label class="sr-only" for="st-<%= a.id %>">Holat</label>
+              <select id="st-<%= a.id %>" name="status" class="status-select status--<%= a.status %>" data-status-select>
+                <% STATUSES.forEach(function (s) { %>
+                <option value="<%= s %>"<%- a.status === s ? ' selected' : '' %>><%= STATUS_LABELS[s] %></option>
+                <% }) %>
+              </select>
+              <noscript><button class="btn btn-light btn-sm" type="submit">OK</button></noscript>
+            </form>
+          </td>
+          <td class="td-actions">
+            <a class="icon-btn icon-btn--light" href="/admin/applications/<%= a.id %>?back=<%= encodeURIComponent(returnTo) %>" title="Ko'rish va izoh" aria-label="Ariza #<%= a.id %> ni ochish"><%- h.icon('eye') %></a>
+            <form method="post" action="/admin/applications/<%= a.id %>/delete" data-confirm="<%= a.name %> arizasi butunlay o'chiriladi.">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="back" value="<%= returnTo %>">
+              <button class="icon-btn icon-btn--danger" type="submit" title="O'chirish" aria-label="Ariza #<%= a.id %> ni o'chirish"><%- h.icon('trash') %></button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (result.pages > 1) { %>
+  <nav class="pagination" aria-label="Sahifalar">
+    <% if (result.page > 1) { %>
+    <a href="/admin/applications<%= qs({ page: result.page - 1 }) %>" aria-label="Oldingi sahifa"><%- h.icon('chevron-left') %></a>
+    <% } %>
+    <% for (var p = 1; p <= result.pages; p++) { %>
+      <% if (p === 1 || p === result.pages || Math.abs(p - result.page) <= 2) { %>
+      <a href="/admin/applications<%= qs({ page: p }) %>"<%- p === result.page ? ' aria-current="page" class="is-active"' : '' %>><%= p %></a>
+      <% } else if (Math.abs(p - result.page) === 3) { %>
+      <span class="ellipsis">…</span>
+      <% } %>
+    <% } %>
+    <% if (result.page < result.pages) { %>
+    <a href="/admin/applications<%= qs({ page: result.page + 1 }) %>" aria-label="Keyingi sahifa"><%- h.icon('chevron-right') %></a>
+    <% } %>
+  </nav>
+  <% } %>
+  <% } else { %>
+  <div class="empty"><%- h.icon('inbox') %><p><%= (filters.q || filters.course || filters.status) ? "Filtr bo'yicha ariza topilmadi." : "Hozircha arizalar yo'q." %></p></div>
+  <% } %>
+</section>
+
+<%- include('../partials/bottom') %>

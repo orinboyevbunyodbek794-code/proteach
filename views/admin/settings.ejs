@@ -1,0 +1,109 @@
+<%- include('partials/top') %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Sozlamalar</h1>
+    <p class="muted">Parol, administratorlar va bildirishnomalar.</p>
+  </div>
+</div>
+
+<div class="form-grid form-grid--even">
+  <section class="card" aria-labelledby="s-pass">
+    <h2 class="card-title" id="s-pass"><%- h.icon('key') %> Parolni o'zgartirish</h2>
+    <form method="post" action="/admin/settings/password" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="text" name="username" value="<%= admin.username %>" autocomplete="username" hidden>
+      <div class="field">
+        <label for="current_password">Joriy parol</label>
+        <input id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="field">
+        <label for="new_password">Yangi parol</label>
+        <input id="new_password" name="new_password" type="password" autocomplete="new-password" minlength="<%= minPassword %>" maxlength="128" required>
+        <p class="hint">Kamida <%= minPassword %> belgi. Harf, raqam va belgilarni aralashtiring.</p>
+      </div>
+      <div class="field">
+        <label for="confirm_password">Yangi parolni tasdiqlang</label>
+        <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="<%= minPassword %>" maxlength="128" required>
+      </div>
+      <div class="row-actions"><button class="btn btn-primary" type="submit"><%- h.icon('check') %> Parolni saqlash</button></div>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="s-tg">
+    <h2 class="card-title" id="s-tg"><%- h.icon('telegram') %> Telegram bildirishnoma</h2>
+    <div class="tg-status <%= telegramOn ? 'is-on' : '' %>">
+      <span class="dot <%= telegramOn ? 'dot--ok' : 'dot--off' %>"></span>
+      <div>
+        <strong><%= telegramOn ? 'Yoqilgan' : "O'chiq" %></strong>
+        <span class="muted small">
+          <% if (telegramOn) { %>Yangi arizalar chat <%= telegramChat %> ga yuboriladi.<% } else if (telegramHasToken) { %>TELEGRAM_CHAT_ID kiritilmagan.<% } else { %>.env faylida TELEGRAM_BOT_TOKEN va TELEGRAM_CHAT_ID bo'sh.<% } %>
+        </span>
+      </div>
+    </div>
+    <ol class="howto">
+      <li>Telegramda <strong>@BotFather</strong> orqali bot yarating va tokenni oling.</li>
+      <li>Botga /start yozing (yoki botni guruhga qo'shing).</li>
+      <li>Chat ID ni aniqlang (masalan, <strong>@userinfobot</strong> orqali).</li>
+      <li><code>.env</code> faylida <code>TELEGRAM_BOT_TOKEN</code> va <code>TELEGRAM_CHAT_ID</code> ni to'ldirib, serverni qayta ishga tushiring.</li>
+    </ol>
+    <form method="post" action="/admin/settings/telegram-test">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn btn-light" type="submit" <%- telegramOn ? '' : 'disabled' %>><%- h.icon('telegram') %> Sinov xabarini yuborish</button>
+    </form>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="s-admins">
+  <h2 class="card-title" id="s-admins"><%- h.icon('users') %> Administratorlar</h2>
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>Login</th><th>Qo'shilgan</th><th>Oxirgi kirish</th><th><span class="sr-only">Amallar</span></th></tr></thead>
+      <tbody>
+        <% adminList.forEach(function (a) { %>
+        <tr>
+          <td data-label="Login"><strong><%= a.username %></strong><% if (a.id === admin.id) { %> <span class="tag">siz</span><% } %></td>
+          <td data-label="Qo'shilgan"><%= h.formatDateTime(a.created_at) %></td>
+          <td data-label="Oxirgi kirish"><%= a.last_login_at ? h.formatDateTime(a.last_login_at) : '—' %></td>
+          <td class="td-actions">
+            <% if (a.id !== admin.id) { %>
+            <form method="post" action="/admin/settings/admins/<%= a.id %>/delete" data-confirm="&quot;<%= a.username %>&quot; administratori o'chiriladi va uning sessiyalari yopiladi.">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button class="icon-btn icon-btn--danger" type="submit" aria-label="<%= a.username %> ni o'chirish" title="O'chirish"><%- h.icon('trash') %></button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sub-title">Yangi administrator qo'shish</h3>
+  <form method="post" action="/admin/settings/admins" class="inline-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="new_username">Login</label>
+      <input id="new_username" name="username" type="text" autocomplete="off" pattern="[A-Za-z0-9._\-]{3,32}" maxlength="32" required placeholder="masalan: manager">
+    </div>
+    <div class="field">
+      <label for="new_admin_password">Parol</label>
+      <input id="new_admin_password" name="password" type="password" autocomplete="new-password" minlength="<%= minPassword %>" maxlength="128" required>
+    </div>
+    <div class="field">
+      <label for="new_admin_confirm">Tasdiqlash</label>
+      <input id="new_admin_confirm" name="confirm_password" type="password" autocomplete="new-password" minlength="<%= minPassword %>" maxlength="128" required>
+    </div>
+    <button class="btn btn-dark" type="submit"><%- h.icon('plus') %> Qo'shish</button>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="s-sys">
+  <h2 class="card-title" id="s-sys"><%- h.icon('settings') %> Tizim</h2>
+  <dl class="meta-list">
+    <div><dt>Video hajmi chegarasi</dt><dd><%= maxVideoMb %> MB <span class="muted small">(.env: MAX_VIDEO_MB)</span></dd></div>
+    <div><dt>Sessiya muddati</dt><dd><%= sessionHours %> soat faolsizlikdan so'ng <span class="muted small">(.env: SESSION_MAX_AGE_HOURS)</span></dd></div>
+  </dl>
+</section>
+
+<%- include('partials/bottom') %>

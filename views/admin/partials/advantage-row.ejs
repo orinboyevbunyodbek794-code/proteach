@@ -1,0 +1,26 @@
+<li class="adv-row" data-repeat-row>
+  <div class="adv-row-head">
+    <label class="adv-icon-select">
+      <span class="sr-only">Belgi</span>
+      <span class="adv-icon-preview" data-icon-preview><%- h.icon(a.icon) %></span>
+      <select name="adv_icon" data-icon-select>
+        <% icons.forEach(function (ic) { %>
+        <option value="<%= ic %>"<%- a.icon === ic ? ' selected' : '' %>><%= iconLabels[ic] || ic %></option>
+        <% }) %>
+      </select>
+    </label>
+    <div class="row-tools">
+      <button class="icon-btn icon-btn--light" type="button" data-row-up aria-label="Yuqoriga"><%- h.icon('arrow-up') %></button>
+      <button class="icon-btn icon-btn--light" type="button" data-row-down aria-label="Pastga"><%- h.icon('arrow-down') %></button>
+      <button class="icon-btn icon-btn--danger" type="button" data-row-remove aria-label="O'chirish"><%- h.icon('trash') %></button>
+    </div>
+  </div>
+  <div class="tri-grid">
+    <% langs.forEach(function (l) { %>
+    <div class="tri-col">
+      <input type="text" name="adv_title_<%= l[0] %>" maxlength="80" value="<%= a.title[l[0]] %>" placeholder="Sarlavha (<%= l[0].toUpperCase() %>)" aria-label="Sarlavha, <%= l[1] %>">
+      <textarea name="adv_text_<%= l[0] %>" rows="3" maxlength="300" placeholder="Matn (<%= l[0].toUpperCase() %>)" aria-label="Matn, <%= l[1] %>"><%= a.text[l[0]] %></textarea>
+    </div>
+    <% }) %>
+  </div>
+</li>

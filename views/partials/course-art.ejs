@@ -1,0 +1,4 @@
+<div class="course-art course-art--<%= index % 3 %>">
+  <span class="course-art-num"><%= String(index + 1).padStart(2, '0') %></span>
+  <span class="course-art-icon"><%- h.icon(c.icon) %></span>
+</div>

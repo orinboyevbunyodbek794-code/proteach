@@ -1,0 +1,25 @@
+<article class="course-card" data-reveal>
+  <a class="course-media" href="<%= c.url %>" tabindex="-1" aria-hidden="true">
+    <% if (c.imageUrl) { %>
+    <img src="<%= c.imageSmall %>" srcset="<%= c.imageSmall %> 600w, <%= c.imageUrl %> 1200w"
+      sizes="(min-width: 1180px) 370px, (min-width: 720px) 46vw, 92vw"
+      width="600" height="375" alt="" loading="lazy" decoding="async">
+    <% } else { %>
+    <%- include('course-art', { c: c, index: index }) %>
+    <% } %>
+  </a>
+  <div class="course-body">
+    <h3 class="course-title"><a href="<%= c.url %>"><%= c.name %></a></h3>
+    <% if (c.short) { %><p class="course-short"><%= c.short %></p><% } %>
+    <ul class="course-meta">
+      <% if (c.duration) { %>
+      <li><%- h.icon('clock') %><span><span class="sr-only"><%= t('courses.duration') %>: </span><%= c.duration %></span></li>
+      <% } %>
+      <li><%- h.icon('wallet') %><span><% if (c.priceLabel) { %><span class="sr-only"><%= t('courses.price') %>: </span><%= c.priceLabel %><% } else { %><%= t('courses.priceContact') %><% } %></span></li>
+    </ul>
+    <div class="course-actions">
+      <a class="btn btn-outline" href="<%= c.url %>"><%= t('courses.details') %><span class="sr-only">: <%= c.name %></span></a>
+      <a class="btn btn-primary" href="<%= c.url %>#apply" data-apply-course="<%= c.id %>"><%= t('courses.apply') %> <%- h.icon('arrow-right') %></a>
+    </div>
+  </div>
+</article>

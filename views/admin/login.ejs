@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Kirish — Pro Teach admin</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="<%= h.asset('/css/admin.css') %>">
+</head>
+<body class="auth">
+  <main class="auth-card">
+    <img class="auth-logo" src="/img/logo-dark.png" alt="Pro Teach" width="203" height="71">
+    <h1>Admin panelga kirish</h1>
+    <p class="muted">Davom etish uchun login va parolingizni kiriting.</p>
+    <% if (error) { %>
+    <div class="flash flash--error" role="alert"><%- h.icon('alert') %><span><%= error %></span></div>
+    <% } %>
+    <form method="post" action="/admin/login" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="next" value="<%= next %>">
+      <div class="field">
+        <label for="username">Login</label>
+        <input id="username" name="username" type="text" autocomplete="username" required maxlength="64" value="<%= username %>" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Parol</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="200">
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Kirish</button>
+    </form>
+    <a class="auth-back" href="/">← Saytga qaytish</a>
+  </main>
+</body>
+</html>

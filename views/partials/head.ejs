@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="<%= t('meta.htmlLang') %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= h.plain(meta.title) %></title>
+  <meta name="description" content="<%= h.plain(meta.description) %>">
+  <meta name="robots" content="<%= meta.robots || 'index, follow' %>">
+  <meta name="theme-color" content="#0d0d0f">
+  <link rel="canonical" href="<%= canonical %>">
+<% langs.forEach(function (l) { %>  <link rel="alternate" hreflang="<%= l %>" href="<%= siteUrl + alternates[l] %>">
+<% }) %>  <link rel="alternate" hreflang="x-default" href="<%= siteUrl + alternates.uz %>">
+
+  <meta property="og:type" content="<%= meta.type || 'website' %>">
+  <meta property="og:site_name" content="Pro Teach">
+  <meta property="og:title" content="<%= h.plain(meta.title) %>">
+  <meta property="og:description" content="<%= h.plain(meta.description) %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:image" content="<%= ogImage %>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="<%= t('meta.ogLocale') %>">
+<% langs.filter(function (l) { return l !== lang; }).forEach(function (l) { %>  <meta property="og:locale:alternate" content="<%= { uz: 'uz_UZ', ru: 'ru_RU', en: 'en_US' }[l] %>">
+<% }) %>  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link rel="preload" href="/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<% if (lang === 'ru') { %>  <link rel="preload" href="/fonts/manrope-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<% } %>  <link rel="stylesheet" href="<%= h.asset('/css/site.css') %>">
+  <script src="<%= h.asset('/js/site.js') %>" defer></script>
+<% (jsonLd || []).forEach(function (item) { %>  <script type="application/ld+json"><%- h.jsonLd(item) %></script>
+<% }) %></head>

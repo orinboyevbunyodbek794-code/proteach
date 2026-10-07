@@ -1,0 +1,102 @@
+<%- include('../partials/head') %>
+<body class="page-course">
+<%- include('../partials/header') %>
+
+<main id="main">
+  <section class="course-hero" aria-labelledby="course-title">
+    <div class="container course-hero-grid">
+      <div class="course-hero-copy">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="<%= home %>"><%= t('course.breadcrumbHome') %></a></li>
+            <li><a href="<%= home %>#courses"><%= t('course.breadcrumbCourses') %></a></li>
+            <li aria-current="page"><%= course.name %></li>
+          </ol>
+        </nav>
+        <h1 class="course-hero-title" id="course-title"><%= course.name %></h1>
+        <% if (course.short) { %><p class="hero-lead"><%= course.short %></p><% } %>
+        <ul class="course-hero-meta">
+          <% if (course.duration) { %>
+          <li><%- h.icon('clock') %><span><small><%= t('courses.duration') %></small><%= course.duration %></span></li>
+          <% } %>
+          <li><%- h.icon('wallet') %><span><small><%= t('courses.price') %></small><%= course.priceLabel || t('courses.priceContact').replace(/^[^:]+:\s*/, '') %></span></li>
+        </ul>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#apply"><%= t('courses.apply') %> <%- h.icon('arrow-right') %></a>
+          <% if (contacts.phones.length) { %>
+          <a class="btn btn-ghost btn-lg" href="<%= contacts.phones[0].href %>"><%- h.icon('phone') %> <%= contacts.phones[0].display %></a>
+          <% } %>
+        </div>
+      </div>
+      <div class="course-hero-media">
+        <% if (course.imageUrl) { %>
+        <img src="<%= course.imageUrl %>" srcset="<%= course.imageSmall %> 600w, <%= course.imageUrl %> 1200w"
+          sizes="(min-width: 960px) 520px, 92vw" width="1200" height="750" alt="<%= course.name %>" fetchpriority="high">
+        <% } else { %>
+        <%- include('../partials/course-art', { c: course, index: Math.max(0, courses.findIndex(function (x) { return x.id === course.id; })) }) %>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="section course-details">
+    <div class="container course-layout">
+      <div class="course-main">
+        <% if (course.description) { %>
+        <div class="course-block" data-reveal>
+          <h2 class="block-title"><%= t('course.aboutTitle') %></h2>
+          <div class="prose"><%- h.richText(course.description) %></div>
+        </div>
+        <% } %>
+        <% if (course.learn.length) { %>
+        <div class="course-block" data-reveal>
+          <h2 class="block-title"><%= t('course.learnTitle') %></h2>
+          <ul class="learn-list">
+            <% course.learn.forEach(function (item) { %>
+            <li><span class="learn-check"><%- h.icon('check') %></span><span><%= item %></span></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+      </div>
+      <aside class="course-aside" aria-label="<%= t('course.factsTitle') %>">
+        <div class="facts-card" data-reveal>
+          <h2 class="facts-title"><%= t('course.factsTitle') %></h2>
+          <dl class="facts">
+            <% if (course.duration) { %>
+            <div><dt><%- h.icon('clock') %><%= t('courses.duration') %></dt><dd><%= course.duration %></dd></div>
+            <% } %>
+            <div><dt><%- h.icon('wallet') %><%= t('courses.price') %></dt><dd><%= course.priceLabel || t('courses.priceContact').replace(/^[^:]+:\s*/, '') %></dd></div>
+            <% if (contacts.address) { %>
+            <div><dt><%- h.icon('map-pin') %><%= t('contact.address') %></dt><dd><%= contacts.address %></dd></div>
+            <% } %>
+          </dl>
+          <a class="btn btn-primary btn-block" href="#apply"><%= t('courses.apply') %> <%- h.icon('arrow-right') %></a>
+          <a class="btn btn-outline btn-block" href="<%= home %>#courses"><%- h.icon('arrow-left') %> <%= t('course.back') %></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <%- include('../partials/apply') %>
+
+  <% if (others.length) { %>
+  <section class="section courses" aria-labelledby="others-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><%= t('courses.label') %></p>
+        <h2 class="section-title" id="others-title"><%= t('courses.otherTitle') %></h2>
+      </div>
+      <div class="course-grid">
+        <% others.forEach(function (c) { %>
+        <%- include('../partials/course-card', { c: c, index: courses.findIndex(function (x) { return x.id === c.id; }) }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

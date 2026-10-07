@@ -1,0 +1,107 @@
+<section class="section section-dark apply" id="apply" aria-labelledby="apply-title">
+  <div class="container apply-grid">
+    <div class="apply-intro" data-reveal>
+      <p class="eyebrow"><%= t('form.label') %></p>
+      <h2 class="section-title" id="apply-title"><%= page === 'course' ? t('course.applyTitle') : t('form.title') %></h2>
+      <p class="lead"><%= page === 'course' ? t('course.applyText') : t('form.subtitle') %></p>
+      <ol class="steps">
+        <% t('form.steps').forEach(function (step, i) { %>
+        <li><span class="step-num"><%= i + 1 %></span><span><%= step %></span></li>
+        <% }) %>
+      </ol>
+      <% if (contacts.phones.length) { %>
+      <div class="apply-call">
+        <p><%= t('form.callUs') %></p>
+        <div class="phone-pills">
+          <% contacts.phones.forEach(function (p) { %>
+          <a class="phone-pill" href="<%= p.href %>"><%- h.icon('phone') %><%= p.display %></a>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="apply-card" data-reveal>
+      <form class="apply-form" method="post" action="/<%= lang %>/apply" novalidate data-apply-form
+        <%- form.applied ? 'hidden' : '' %>
+        data-msg-sending="<%= t('form.sending') %>"
+        data-msg-network="<%= t('form.errors.network') %>"
+        data-msg-generic="<%= t('form.errors.generic') %>"
+        data-err-name="<%= t('form.errors.name') %>"
+        data-err-phone="<%= t('form.errors.phone') %>"
+        data-err-course="<%= t('form.errors.course') %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="return" value="<%= form.returnTo %>">
+
+        <!-- Spamdan himoya: odamlar bu maydonni ko'rmaydi -->
+        <div class="hp" aria-hidden="true">
+          <label for="f-website">Website</label>
+          <input id="f-website" type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="form-alert" role="alert" data-form-alert <%- form.failed ? '' : 'hidden' %>>
+          <%- h.icon('alert') %><span data-form-alert-text><%= form.failed ? t('form.errors.generic') : '' %></span>
+        </div>
+
+        <div class="field" data-field="name">
+          <label for="f-name"><%= t('form.name') %> <span class="req" aria-hidden="true">*</span></label>
+          <input id="f-name" name="name" type="text" required maxlength="80" autocomplete="name"
+            placeholder="<%= t('form.namePh') %>" aria-describedby="f-name-err">
+          <p class="field-error" id="f-name-err" hidden></p>
+        </div>
+
+        <div class="field" data-field="phone">
+          <label for="f-phone"><%= t('form.phone') %> <span class="req" aria-hidden="true">*</span></label>
+          <input id="f-phone" name="phone" type="tel" required inputmode="tel" autocomplete="tel" maxlength="17"
+            placeholder="<%= t('form.phonePh') %>" aria-describedby="f-phone-err" data-phone-mask>
+          <p class="field-error" id="f-phone-err" hidden></p>
+        </div>
+
+        <div class="field" data-field="course">
+          <label for="f-course"><%= t('form.course') %> <span class="req" aria-hidden="true">*</span></label>
+          <div class="select-wrap">
+            <select id="f-course" name="course" required aria-describedby="f-course-err" data-course-select>
+              <option value=""><%= t('form.coursePh') %></option>
+              <% courses.forEach(function (c) { %>
+              <option value="<%= c.id %>"<%- form.selectedId === c.id ? ' selected' : '' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+            <%- h.icon('chevron-down', 'select-caret') %>
+          </div>
+          <p class="field-error" id="f-course-err" hidden></p>
+        </div>
+
+        <div class="field" data-field="category">
+          <label for="f-category"><%= t('form.category') %> <span class="optional">(<%= t('form.optional') %>)</span></label>
+          <div class="select-wrap">
+            <select id="f-category" name="category">
+              <option value=""><%= t('form.categoryPh') %></option>
+              <% ['school', 'student', 'worker', 'other'].forEach(function (k) { %>
+              <option value="<%= k %>"><%= t('form.categories.' + k) %></option>
+              <% }) %>
+            </select>
+            <%- h.icon('chevron-down', 'select-caret') %>
+          </div>
+        </div>
+
+        <div class="field" data-field="comment">
+          <label for="f-comment"><%= t('form.comment') %> <span class="optional">(<%= t('form.optional') %>)</span></label>
+          <textarea id="f-comment" name="comment" rows="3" maxlength="500" placeholder="<%= t('form.commentPh') %>" aria-describedby="f-comment-err"></textarea>
+          <p class="field-error" id="f-comment-err" hidden></p>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" data-submit>
+          <span data-submit-label><%= t('form.submit') %></span> <%- h.icon('arrow-right') %>
+        </button>
+        <p class="form-note"><%= t('form.note') %></p>
+      </form>
+
+      <div class="apply-success" data-apply-success tabindex="-1" <%- form.applied ? '' : 'hidden' %>>
+        <span class="success-icon"><%- h.icon('check') %></span>
+        <h3><%= t('form.successTitle') %></h3>
+        <p data-success-text><%= t('form.successText') %></p>
+        <a class="btn btn-outline" href="<%= form.returnTo %>#apply" data-apply-again><%= t('form.again') %></a>
+      </div>
+    </div>
+  </div>
+</section>

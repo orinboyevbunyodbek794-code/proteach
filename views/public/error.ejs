@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<body class="page-error">
+<%- include('../partials/header') %>
+
+<main id="main" class="error-main">
+  <div class="container error-box">
+    <div class="error-code" aria-hidden="true">
+      <img src="/img/favicon.svg" alt="" width="96" height="96" class="error-cube">
+      <span><%= code %></span>
+    </div>
+    <h1 class="error-title"><%= title %></h1>
+    <% if (text) { %><p class="hero-lead"><%= text %></p><% } %>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="<%= home %>"><%- h.icon('home') %> <%= t('errors.home') %></a>
+      <% if (contacts.phones.length) { %>
+      <a class="btn btn-ghost btn-lg" href="<%= contacts.phones[0].href %>"><%- h.icon('phone') %> <%= contacts.phones[0].display %></a>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,19 @@
+    </main>
+  </div>
+</div>
+
+<!-- Tasdiqlash oynasi (o'chirish va boshqa qaytarib bo'lmaydigan amallar uchun) -->
+<dialog class="confirm" data-confirm-dialog aria-labelledby="confirm-title">
+  <form method="dialog" class="confirm-box">
+    <span class="confirm-icon"><%- h.icon('trash') %></span>
+    <h2 id="confirm-title" data-confirm-title>Ishonchingiz komilmi?</h2>
+    <p data-confirm-text></p>
+    <div class="confirm-actions">
+      <button class="btn btn-light" value="cancel" type="submit">Bekor qilish</button>
+      <button class="btn btn-danger" value="ok" type="submit" data-confirm-ok>O'chirish</button>
+    </div>
+  </form>
+</dialog>
+<div class="toasts" data-toasts aria-live="polite"></div>
+</body>
+</html>

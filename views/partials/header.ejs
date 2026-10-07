@@ -1,0 +1,40 @@
+<a class="skip-link" href="#main"><%= t('nav.skip') %></a>
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a class="brand" href="<%= home %>" aria-label="Pro Teach — <%= t('nav.home') %>">
+      <img src="/img/logo-light.png" alt="Pro Teach" width="203" height="71" class="brand-logo">
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="<%= t('nav.mainNav') %>" data-nav>
+      <ul class="nav-list">
+        <li><a href="<%= home %>"<%- page === 'home' ? ' aria-current="page"' : '' %>><%= t('nav.home') %></a></li>
+        <li><a href="<%= home %>#about"><%= t('nav.about') %></a></li>
+        <li><a href="<%= home %>#courses"><%= t('nav.courses') %></a></li>
+        <li><a href="<%= home %>#contact"><%= t('nav.contact') %></a></li>
+      </ul>
+      <div class="nav-mobile-extra">
+        <a class="btn btn-primary btn-block" href="<%= page === 'course' ? '#apply' : home + '#apply' %>" data-close-nav><%= t('nav.apply') %> <%- h.icon('arrow-right') %></a>
+        <% if (contacts.phones.length) { %>
+        <div class="nav-phones">
+          <% contacts.phones.forEach(function (p) { %>
+          <a href="<%= p.href %>"><%- h.icon('phone') %> <%= p.display %></a>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <div class="lang-switch" role="group" aria-label="<%= t('nav.language') %>">
+        <% langs.forEach(function (l) { %>
+        <a href="<%= alternates[l] %>" hreflang="<%= l %>" lang="<%= l %>" title="<%= langNames[l] %>"<%- l === lang ? ' aria-current="true" class="is-active"' : '' %>><%= l.toUpperCase() %></a>
+        <% }) %>
+      </div>
+      <a class="btn btn-primary btn-sm header-cta" href="<%= page === 'course' ? '#apply' : home + '#apply' %>"><%= t('nav.apply') %></a>
+      <button class="nav-toggle" type="button" aria-controls="main-nav" aria-expanded="false" data-nav-toggle
+        data-label-open="<%= t('nav.menu') %>" data-label-close="<%= t('nav.close') %>" aria-label="<%= t('nav.menu') %>">
+        <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>

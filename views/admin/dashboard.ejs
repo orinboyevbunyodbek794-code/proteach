@@ -1,0 +1,125 @@
+<%- include('partials/top') %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Xush kelibsiz, <%= admin.username %>!</h1>
+    <p class="muted">Pro Teach sayti va arizalar holati bir qarashda.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-light" href="/uz/" target="_blank" rel="noopener"><%- h.icon('external') %> Saytni ochish</a>
+    <a class="btn btn-primary" href="/admin/applications?status=new"><%- h.icon('inbox') %> Yangi arizalar</a>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <a class="stat-card stat-card--accent" href="/admin/applications?status=new">
+    <span class="stat-icon"><%- h.icon('bell') %></span>
+    <span class="stat-label">Yangi arizalar</span>
+    <strong class="stat-value"><%= stats.newCount %></strong>
+    <span class="stat-hint">Javob kutmoqda</span>
+  </a>
+  <a class="stat-card" href="/admin/applications">
+    <span class="stat-icon"><%- h.icon('inbox') %></span>
+    <span class="stat-label">Jami arizalar</span>
+    <strong class="stat-value"><%= stats.total %></strong>
+    <span class="stat-hint">Barcha vaqt davomida</span>
+  </a>
+  <a class="stat-card" href="/admin/courses">
+    <span class="stat-icon"><%- h.icon('book') %></span>
+    <span class="stat-label">Faol kurslar</span>
+    <strong class="stat-value"><%= activeCourses %><small> / <%= totalCourses %></small></strong>
+    <span class="stat-hint">Saytda ko'rinadi</span>
+  </a>
+  <div class="stat-card">
+    <span class="stat-icon"><%- h.icon('calendar') %></span>
+    <span class="stat-label">Oxirgi 7 kun</span>
+    <strong class="stat-value"><%= stats.weekTotal %></strong>
+    <span class="stat-hint">Kelgan arizalar</span>
+  </div>
+</div>
+
+<div class="dash-grid">
+  <section class="card" aria-labelledby="chart-title">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title" id="chart-title">Haftalik arizalar</h2>
+        <p class="muted small">Oxirgi 7 kun, kunlar kesimida (Toshkent vaqti)</p>
+      </div>
+    </div>
+    <div class="chart" data-chart>
+      <svg viewBox="0 0 <%= chart.W %> <%= chart.H %>" class="chart-svg" role="img" aria-label="Oxirgi 7 kunlik arizalar grafigi">
+        <% chart.grid.forEach(function (g) { %>
+        <line x1="<%= chart.pad.left %>" x2="<%= chart.W - chart.pad.right %>" y1="<%= g.y %>" y2="<%= g.y %>" class="chart-grid<%= g.value === 0 ? ' chart-base' : '' %>"/>
+        <text x="<%= chart.pad.left - 10 %>" y="<%= g.y + 4 %>" class="chart-axis" text-anchor="end"><%= g.value %></text>
+        <% }) %>
+        <% chart.bars.forEach(function (b) { %>
+        <g class="chart-bar<%= b.isToday ? ' is-today' : '' %>" tabindex="0" data-tip="<%= b.fullDate %>: <%= b.count %> ta ariza">
+          <rect class="chart-hit" x="<%= b.slotX %>" y="<%= chart.pad.top %>" width="<%= b.slotW %>" height="<%= chart.plotH %>"/>
+          <% if (b.path) { %><path d="<%= b.path %>" class="chart-mark"/><% } else { %><rect x="<%= b.x %>" y="<%= chart.baseline - 2 %>" width="<%= b.w %>" height="2" rx="1" class="chart-zero"/><% } %>
+          <% if (b.showValue) { %><text x="<%= b.cx %>" y="<%= b.y - 8 %>" text-anchor="middle" class="chart-value"><%= b.count %></text><% } %>
+          <text x="<%= b.cx %>" y="<%= chart.baseline + 18 %>" text-anchor="middle" class="chart-x"><%= b.label %></text>
+          <text x="<%= b.cx %>" y="<%= chart.baseline + 34 %>" text-anchor="middle" class="chart-x chart-x--sub"><%= b.date %></text>
+        </g>
+        <% }) %>
+      </svg>
+      <div class="chart-tip" data-chart-tip hidden></div>
+    </div>
+    <table class="sr-only">
+      <caption>Oxirgi 7 kunlik arizalar</caption>
+      <thead><tr><th>Sana</th><th>Arizalar</th></tr></thead>
+      <tbody>
+        <% chart.bars.forEach(function (b) { %><tr><td><%= b.fullDate %></td><td><%= b.count %></td></tr><% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" aria-labelledby="status-title">
+    <h2 class="card-title" id="status-title">Tizim holati</h2>
+    <ul class="check-list">
+      <li>
+        <span class="dot <%= telegramOn ? 'dot--ok' : 'dot--off' %>"></span>
+        <div><strong>Telegram bildirishnoma</strong><span class="muted small"><%= telegramOn ? 'Yoqilgan — yangi arizalar Telegramga keladi' : "O'chiq — .env da TELEGRAM_BOT_TOKEN va TELEGRAM_CHAT_ID ni to'ldiring" %></span></div>
+      </li>
+      <li>
+        <span class="dot <%= activeCourses ? 'dot--ok' : 'dot--warn' %>"></span>
+        <div><strong>Kurslar</strong><span class="muted small"><%= activeCourses %> ta kurs saytda ko'rinmoqda</span></div>
+      </li>
+    </ul>
+    <div class="quick-links">
+      <a href="/admin/courses/new"><%- h.icon('plus') %> Yangi kurs qo'shish</a>
+      <a href="/admin/video"><%- h.icon('upload') %> Video yuklash</a>
+      <a href="/admin/contacts"><%- h.icon('phone') %> Kontaktlarni tahrirlash</a>
+      <a href="/admin/applications/export.xlsx"><%- h.icon('download') %> Arizalarni Excelga yuklash</a>
+    </div>
+  </section>
+</div>
+
+<section class="card" aria-labelledby="latest-title">
+  <div class="card-head">
+    <h2 class="card-title" id="latest-title">Oxirgi arizalar</h2>
+    <a class="link" href="/admin/applications">Barchasi <%- h.icon('arrow-right') %></a>
+  </div>
+  <% if (stats.latest.length) { %>
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>Sana</th><th>Ism</th><th>Telefon</th><th>Kurs</th><th>Holat</th><th><span class="sr-only">Amallar</span></th></tr></thead>
+      <tbody>
+        <% stats.latest.forEach(function (a) { %>
+        <tr>
+          <td data-label="Sana" class="nowrap"><%= h.formatDateTime(a.created_at) %></td>
+          <td data-label="Ism"><strong><%= a.name %></strong></td>
+          <td data-label="Telefon" class="nowrap"><a class="tel" href="<%= h.telHref(a.phone) %>"><%- h.icon('phone') %><%= h.formatPhone(a.phone) %></a></td>
+          <td data-label="Kurs"><%= a.course_name_snapshot || '—' %></td>
+          <td data-label="Holat"><span class="status status--<%= a.status %>"><%= STATUS_LABELS[a.status] %></span></td>
+          <td class="td-actions"><a class="btn btn-light btn-sm" href="/admin/applications/<%= a.id %>">Ko'rish</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } else { %>
+  <div class="empty"><%- h.icon('inbox') %><p>Hozircha arizalar yo'q. Saytdagi forma orqali kelgan arizalar shu yerda ko'rinadi.</p></div>
+  <% } %>
+</section>
+
+<%- include('partials/bottom') %>

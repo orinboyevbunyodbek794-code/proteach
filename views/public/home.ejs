@@ -1,0 +1,180 @@
+<%- include('../partials/head') %>
+<body class="page-home">
+<%- include('../partials/header') %>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="hero-badge"><span class="pulse-dot" aria-hidden="true"></span><%= t('hero.badge') %></p>
+        <h1 class="hero-title" id="hero-title"><%- h.highlight(content.heroTitle) %></h1>
+        <p class="hero-lead"><%= content.heroSubtitle %></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#apply"><%= t('hero.ctaApply') %> <%- h.icon('arrow-right') %></a>
+          <a class="btn btn-ghost btn-lg" href="#courses"><%= t('hero.ctaCourses') %></a>
+        </div>
+        <ul class="hero-stats">
+          <li><strong><%= t('hero.stats.sinceValue') %></strong><span><%= t('hero.stats.sinceLabel') %></span></li>
+          <% if (courses.length) { %>
+          <li><strong><%= courses.length %></strong><span><%= h.plural(lang, courses.length, t('hero.stats.coursesLabel')) %></span></li>
+          <% } %>
+          <li><strong><%= t('hero.stats.aiValue') %></strong><span><%= t('hero.stats.aiLabel') %></span></li>
+        </ul>
+      </div>
+      <%- include('../partials/hero-visual') %>
+    </div>
+  </section>
+
+  <!-- Yuguruvchi lenta -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <% for (var k = 0; k < 2; k++) { %>
+      <div class="ticker-group">
+        <% courses.map(function (c) { return c.name; }).concat(t('ticker')).forEach(function (word) { %>
+        <span class="ticker-item"><%= word %></span>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (video) { %>
+  <!-- VIDEO -->
+  <section class="section video-section" id="video" aria-labelledby="video-title">
+    <div class="container video-grid">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><%= t('video.label') %></p>
+        <h2 class="section-title" id="video-title"><%= t('video.title') %></h2>
+        <p class="section-lead"><%= t('video.text') %></p>
+      </div>
+      <div class="video-frame" data-reveal>
+        <video controls preload="metadata" playsinline width="1280" height="720"<% if (video.poster) { %> poster="<%= video.poster %>"<% } %>>
+          <source src="<%= video.url %>" type="<%= video.mime || 'video/mp4' %>">
+          <p><%= t('video.unsupported') %></p>
+        </video>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- BIZ HAQIMIZDA -->
+  <section class="section about" id="about" aria-labelledby="about-title">
+    <div class="container about-grid">
+      <div class="about-text" data-reveal>
+        <p class="eyebrow"><%= t('about.label') %></p>
+        <h2 class="section-title" id="about-title"><%= content.aboutTitle %></h2>
+        <div class="prose"><%- h.richText(content.aboutText) %></div>
+        <p class="motto"><%- h.highlight(t('about.motto')) %></p>
+      </div>
+      <ul class="adv-grid">
+        <% content.advantages.forEach(function (a) { %>
+        <li class="adv-card" data-reveal>
+          <span class="adv-icon"><%- h.icon(a.icon) %></span>
+          <h3><%= a.title %></h3>
+          <% if (a.text) { %><p><%= a.text %></p><% } %>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+  </section>
+
+  <!-- KURSLAR -->
+  <section class="section courses" id="courses" aria-labelledby="courses-title">
+    <div class="container">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="eyebrow"><%= t('courses.label') %></p>
+          <h2 class="section-title" id="courses-title"><%= t('courses.title') %></h2>
+        </div>
+        <p class="section-lead"><%= t('courses.subtitle') %></p>
+      </div>
+      <% if (courses.length) { %>
+      <div class="course-grid">
+        <% courses.forEach(function (c, index) { %>
+        <%- include('../partials/course-card', { c: c, index: index }) %>
+        <% }) %>
+      </div>
+      <% } else { %>
+      <p class="empty-state"><%= t('courses.empty') %></p>
+      <% } %>
+    </div>
+  </section>
+
+  <%- include('../partials/apply') %>
+
+  <!-- BOG'LANISH -->
+  <section class="section contact" id="contact" aria-labelledby="contact-title">
+    <div class="container">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="eyebrow"><%= t('contact.label') %></p>
+          <h2 class="section-title" id="contact-title"><%= t('contact.title') %></h2>
+        </div>
+        <p class="section-lead"><%= t('contact.subtitle') %></p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-cards">
+          <% if (contacts.phones.length) { %>
+          <div class="contact-card contact-card--phones" data-reveal>
+            <span class="contact-icon"><%- h.icon('phone') %></span>
+            <h3><%= t('contact.phones') %></h3>
+            <ul class="phone-list">
+              <% contacts.phones.forEach(function (p) { %>
+              <li><a href="<%= p.href %>"><%= p.display %></a></li>
+              <% }) %>
+            </ul>
+          </div>
+          <% } %>
+          <% if (contacts.address) { %>
+          <div class="contact-card" data-reveal>
+            <span class="contact-icon"><%- h.icon('map-pin') %></span>
+            <h3><%= t('contact.address') %></h3>
+            <p><%= contacts.address %></p>
+            <% if (contacts.mapLink) { %>
+            <a class="link-arrow" href="<%= contacts.mapLink %>" target="_blank" rel="noopener"><%= t('contact.openMap') %> <%- h.icon('arrow-up-right') %></a>
+            <% } %>
+          </div>
+          <% } %>
+          <% if (contacts.hours) { %>
+          <div class="contact-card" data-reveal>
+            <span class="contact-icon"><%- h.icon('clock') %></span>
+            <h3><%= t('contact.hours') %></h3>
+            <p><%= contacts.hours %></p>
+          </div>
+          <% } %>
+          <% if (contacts.socials.length || contacts.email) { %>
+          <div class="contact-card" data-reveal>
+            <span class="contact-icon"><%- h.icon('globe') %></span>
+            <h3><%= t('contact.social') %></h3>
+            <ul class="social-links">
+              <% contacts.socials.forEach(function (s) { %>
+              <li><a href="<%= s.url %>" target="_blank" rel="noopener"><%- h.icon(s.icon) %><span><%= s.handle || s.label %></span></a></li>
+              <% }) %>
+              <% if (contacts.email) { %>
+              <li><a href="mailto:<%= contacts.email %>"><%- h.icon('mail') %><span><%= contacts.email %></span></a></li>
+              <% } %>
+            </ul>
+          </div>
+          <% } %>
+        </div>
+
+        <% if (contacts.mapEmbed || contacts.mapLink) { %>
+        <div class="map-frame" data-reveal>
+          <% if (contacts.mapEmbed) { %>
+          <iframe src="<%= contacts.mapEmbed %>" title="<%= t('contact.mapTitle') %>" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <% } else { %>
+          <a class="map-fallback" href="<%= contacts.mapLink %>" target="_blank" rel="noopener">
+            <%- h.icon('map-pin') %><span><%= t('contact.openMap') %></span>
+          </a>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<div class="hero-visual" aria-hidden="true">
+  <svg class="hero-cubes" viewBox="0 0 520 520" role="presentation">
+    <defs>
+      <pattern id="iso-grid" width="40" height="23.094" patternUnits="userSpaceOnUse">
+        <path d="M0 0 40 23.094M0 23.094 40 0" stroke="#fff" stroke-opacity=".07" stroke-width="1" fill="none"/>
+      </pattern>
+      <radialGradient id="grid-fade" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <mask id="grid-mask"><rect width="520" height="520" fill="url(#grid-fade)"/></mask>
+      <radialGradient id="glow" cx="50%" cy="55%" r="50%">
+        <stop offset="0" stop-color="#feb407" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#feb407" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="520" height="520" fill="url(#iso-grid)" mask="url(#grid-mask)"/>
+    <circle cx="260" cy="270" r="230" fill="url(#glow)"/>
+
+    <!-- Asosiy kub (logodagi kabi yuzlar orasida "Y" shaklidagi tirqish) -->
+    <g class="cube-main" stroke="#0d0d0f" stroke-width="7" stroke-linejoin="round">
+      <polygon points="250,110 371.2,180 250,250 128.8,180" fill="#ffd56e"/>
+      <polygon points="128.8,180 250,250 250,390 128.8,320" fill="#feb407"/>
+      <polygon points="250,250 371.2,180 371.2,320 250,390" fill="#c98a00"/>
+      <!-- Ichki kod belgisi -->
+      <path class="cube-glyph" d="M168 268 150 286 168 304M210 268 228 286 210 304M197 262 181 310" stroke="#0d0d0f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="matrix(1 .577 0 1 0 -100)"/>
+    </g>
+
+    <g class="cube-float cube-float--a" stroke="#0d0d0f" stroke-width="4" stroke-linejoin="round">
+      <polygon points="420,300 468.5,328 420,356 371.5,328" fill="#ffd56e"/>
+      <polygon points="371.5,328 420,356 420,412 371.5,384" fill="#feb407"/>
+      <polygon points="420,356 468.5,328 468.5,384 420,412" fill="#c98a00"/>
+    </g>
+    <g class="cube-float cube-float--b" stroke="#feb407" stroke-width="2.5" stroke-linejoin="round" fill="none">
+      <polygon points="92,70 130.1,92 92,114 53.9,92"/>
+      <polygon points="53.9,92 92,114 92,158 53.9,136"/>
+      <polygon points="92,114 130.1,92 130.1,136 92,158"/>
+    </g>
+    <g class="cube-float cube-float--c" stroke="#feb407" stroke-width="2.5" stroke-linejoin="round">
+      <polygon points="110,380 153.3,405 110,430 66.7,405" fill="#24242a"/>
+      <polygon points="66.7,405 110,430 110,480 66.7,455" fill="#17171b"/>
+      <polygon points="110,430 153.3,405 153.3,455 110,480" fill="#101013"/>
+    </g>
+  </svg>
+  <% (courses || []).slice(0, 4).forEach(function (c, i) { %>
+  <span class="hero-chip hero-chip--<%= i + 1 %>"><span class="hero-chip-icon"><%- h.icon(c.icon) %></span><%= c.name %></span>
+  <% }) %>
+</div>

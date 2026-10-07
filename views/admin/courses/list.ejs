@@ -1,0 +1,60 @@
+<%- include('../partials/top') %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Kurslar</h1>
+    <p class="muted">Faqat <strong>faol</strong> kurslar saytda va yozilish formasida ko'rinadi. Tartibni sudrab o'zgartiring yoki ↑ ↓ tugmalaridan foydalaning.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="/admin/courses/new"><%- h.icon('plus') %> Yangi kurs</a>
+  </div>
+</div>
+
+<% if (list.length) { %>
+<ul class="course-list" data-sortable data-reorder-url="/admin/courses/reorder">
+  <% list.forEach(function (c, i) { %>
+  <li class="course-row<%= c.isActive ? '' : ' is-inactive' %>" data-id="<%= c.id %>" draggable="true">
+    <span class="drag-handle" title="Sudrab tartibni o'zgartiring" aria-hidden="true"><%- h.icon('grip') %></span>
+    <span class="order-num" data-order-num><%= i + 1 %></span>
+    <div class="course-thumb">
+      <% if (c.thumb) { %><img src="<%= c.thumb %>" alt="" width="96" height="60" loading="lazy"><% } else { %><span class="thumb-art"><%- h.icon(c.icon) %></span><% } %>
+    </div>
+    <div class="course-info">
+      <a class="row-title" href="/admin/courses/<%= c.id %>/edit"><%= c.name.uz %></a>
+      <span class="row-sub">
+        /<%= c.slug %>
+        · <%= c.price ? h.formatNumber(c.price) + " so'm" : "narx kiritilmagan" %>
+        <% if (c.duration.uz) { %>· <%= c.duration.uz %><% } %>
+        <% if (!c.name.ru || !c.name.en) { %><span class="tag tag--warn">tarjima to'liq emas</span><% } %>
+      </span>
+    </div>
+    <form method="post" action="/admin/courses/<%= c.id %>/toggle" class="toggle-form" data-toggle-form>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="switch<%= c.isActive ? ' is-on' : '' %>" role="switch" aria-checked="<%= c.isActive ? 'true' : 'false' %>" aria-label="<%= c.name.uz %>: faol">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+        <span class="switch-label" data-switch-label><%= c.isActive ? 'Faol' : 'Nofaol' %></span>
+      </button>
+    </form>
+    <div class="row-tools">
+      <form method="post" action="/admin/courses/<%= c.id %>/move">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="dir" value="up">
+        <button class="icon-btn icon-btn--light" type="submit" aria-label="<%= c.name.uz %>: yuqoriga" <%- i === 0 ? 'disabled' : '' %>><%- h.icon('arrow-up') %></button>
+      </form>
+      <form method="post" action="/admin/courses/<%= c.id %>/move">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="dir" value="down">
+        <button class="icon-btn icon-btn--light" type="submit" aria-label="<%= c.name.uz %>: pastga" <%- i === list.length - 1 ? 'disabled' : '' %>><%- h.icon('arrow-down') %></button>
+      </form>
+      <a class="icon-btn icon-btn--light" href="/admin/courses/<%= c.id %>/edit" aria-label="<%= c.name.uz %>: tahrirlash" title="Tahrirlash"><%- h.icon('edit') %></a>
+      <form method="post" action="/admin/courses/<%= c.id %>/delete" data-confirm="&quot;<%= c.name.uz %>&quot; kursi o'chiriladi. Unga tegishli arizalar saqlanib qoladi.">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="icon-btn icon-btn--danger" type="submit" aria-label="<%= c.name.uz %>: o'chirish" title="O'chirish"><%- h.icon('trash') %></button>
+      </form>
+    </div>
+  </li>
+  <% }) %>
+</ul>
+<% } else { %>
+<div class="card empty"><%- h.icon('book') %><p>Hozircha kurslar yo'q.</p><a class="btn btn-primary" href="/admin/courses/new"><%- h.icon('plus') %> Birinchi kursni qo'shish</a></div>
+<% } %>
+
+<%- include('../partials/bottom') %>

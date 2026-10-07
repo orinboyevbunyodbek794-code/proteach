@@ -1,0 +1,70 @@
+<%- include('../partials/top') %>
+
+<div class="page-head">
+  <div>
+    <a class="back-link" href="<%= back %>"><%- h.icon('arrow-left') %> Arizalar ro'yxati</a>
+    <h1 class="page-title">Ariza #<%= app.id %></h1>
+    <p class="muted"><%= h.formatDateTime(app.created_at) %> da yuborilgan<% if (app.updated_at) { %> · oxirgi o'zgarish: <%= h.formatDateTime(app.updated_at) %><% } %></p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="<%= h.telHref(app.phone) %>"><%- h.icon('phone') %> Qo'ng'iroq qilish</a>
+  </div>
+</div>
+
+<% if (app.is_duplicate) { %>
+<div class="notice notice--warn"><%- h.icon('alert') %><span>Takroriy ariza: bu raqamdan so'nggi <%= duplicateHours %> soat ichida boshqa ariza ham kelgan. Qidiruvda raqamni kiritib, boshqalarini ko'rishingiz mumkin.</span></div>
+<% } %>
+
+<div class="detail-grid">
+  <section class="card" aria-labelledby="info-title">
+    <h2 class="card-title" id="info-title">Ma'lumotlar</h2>
+    <dl class="detail-list">
+      <div><dt>Ism-familiya</dt><dd><strong><%= app.name %></strong></dd></div>
+      <div><dt>Telefon</dt><dd><a class="tel tel--big" href="<%= h.telHref(app.phone) %>"><%- h.icon('phone') %><%= h.formatPhone(app.phone) %></a></dd></div>
+      <div>
+        <dt>Kurs</dt>
+        <dd>
+          <%= app.course_name_snapshot || '—' %>
+          <% if (course) { %><a class="link small" href="/admin/courses/<%= course.id %>/edit">kursni ochish</a><% } else { %><span class="tag">kurs o'chirilgan</span><% } %>
+        </dd>
+      </div>
+      <div><dt>Toifa</dt><dd><%= CATEGORY_LABELS[app.category] || 'Ko\'rsatilmagan' %></dd></div>
+      <div><dt>Sayt tili</dt><dd><span class="lang-tag"><%= app.lang.toUpperCase() %></span></dd></div>
+      <div><dt>Joriy holat</dt><dd><span class="status status--<%= app.status %>"><%= STATUS_LABELS[app.status] %></span></dd></div>
+      <div class="detail-full"><dt>Izoh</dt><dd><%= app.comment || '—' %></dd></div>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="edit-title">
+    <h2 class="card-title" id="edit-title">Holat va izoh</h2>
+    <form method="post" action="/admin/applications/<%= app.id %>" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="back" value="<%= back %>">
+      <fieldset class="field">
+        <legend>Holat</legend>
+        <div class="chip-radios">
+          <% STATUSES.forEach(function (s) { %>
+          <label class="chip-radio chip-radio--<%= s %>">
+            <input type="radio" name="status" value="<%= s %>"<%- app.status === s ? ' checked' : '' %>>
+            <span><i class="status-dot status-dot--<%= s %>"></i><%= STATUS_LABELS[s] %></span>
+          </label>
+          <% }) %>
+        </div>
+      </fieldset>
+      <div class="field">
+        <label for="admin_note">Admin izohi <span class="muted small">(faqat adminlar ko'radi)</span></label>
+        <textarea id="admin_note" name="admin_note" rows="5" maxlength="2000" placeholder="Masalan: 15:00 da qayta qo'ng'iroq qilish kerak"><%= app.admin_note %></textarea>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-primary" type="submit"><%- h.icon('check') %> Saqlash</button>
+      </div>
+    </form>
+    <form method="post" action="/admin/applications/<%= app.id %>/delete" class="danger-zone" data-confirm="<%= app.name %> arizasi butunlay o'chiriladi. Bu amalni qaytarib bo'lmaydi.">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="back" value="<%= back %>">
+      <button class="btn btn-danger-ghost" type="submit"><%- h.icon('trash') %> Arizani o'chirish</button>
+    </form>
+  </section>
+</div>
+
+<%- include('../partials/bottom') %>

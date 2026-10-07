@@ -1,0 +1,35 @@
+{
+  "name": "proteach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pro Teach — zamonaviy kasblar markazi sayti va admin paneli",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/db/seed.js",
+    "backup": "node scripts/backup.js",
+    "assets": "node scripts/build-assets.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^13.0.3",
+    "compression": "^1.8.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^18.0.6",
+    "ejs": "^7.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "multer": "^2.4.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@fontsource-variable/manrope": "^5.3.0"
+  },
+  "license": "UNLICENSED"
+}

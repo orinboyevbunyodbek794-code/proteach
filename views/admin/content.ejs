@@ -1,0 +1,83 @@
+<%- include('partials/top') %>
+<% var langs = [['uz', "O'zbekcha"], ['ru', 'Ruscha'], ['en', 'Inglizcha']]; %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Sayt matnlari</h1>
+    <p class="muted">Bosh sahifadagi asosiy matnlarni kod yozmasdan o'zgartiring. Bo'sh qoldirilgan maydon o'rniga standart matn ko'rsatiladi.</p>
+  </div>
+  <div class="page-actions">
+    <form method="post" action="/admin/content/reset" data-confirm="Barcha matnlar standart holatga qaytariladi. Siz kiritgan o'zgarishlar o'chadi." data-confirm-ok="Qaytarish">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn btn-light" type="submit">Standart matnlarga qaytarish</button>
+    </form>
+  </div>
+</div>
+
+<form method="post" action="/admin/content" class="settings-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <section class="card" aria-labelledby="ct-hero">
+    <h2 class="card-title" id="ct-hero">Hero (birinchi ekran)</h2>
+    <p class="hint">Sarlavhadagi so'zni sariq rangda ajratish uchun uni yulduzcha ichiga oling: <code>Noldan *IT mutaxassisigacha*</code></p>
+    <div class="tri-grid">
+      <% langs.forEach(function (l) { %>
+      <div class="tri-col">
+        <p class="panel-lang"><%= l[1] %></p>
+        <div class="field">
+          <label for="hero_title_<%= l[0] %>">Sarlavha</label>
+          <input id="hero_title_<%= l[0] %>" name="hero_title_<%= l[0] %>" type="text" maxlength="120" value="<%= content.hero_title[l[0]] %>">
+        </div>
+        <div class="field">
+          <label for="hero_subtitle_<%= l[0] %>">Tavsif</label>
+          <textarea id="hero_subtitle_<%= l[0] %>" name="hero_subtitle_<%= l[0] %>" rows="4" maxlength="400"><%= content.hero_subtitle[l[0]] %></textarea>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="ct-about">
+    <h2 class="card-title" id="ct-about">Biz haqimizda</h2>
+    <div class="tri-grid">
+      <% langs.forEach(function (l) { %>
+      <div class="tri-col">
+        <p class="panel-lang"><%= l[1] %></p>
+        <div class="field">
+          <label for="about_title_<%= l[0] %>">Sarlavha</label>
+          <input id="about_title_<%= l[0] %>" name="about_title_<%= l[0] %>" type="text" maxlength="120" value="<%= content.about_title[l[0]] %>">
+        </div>
+        <div class="field">
+          <label for="about_text_<%= l[0] %>">Matn <span class="muted small">(bo'sh qator — yangi paragraf)</span></label>
+          <textarea id="about_text_<%= l[0] %>" name="about_text_<%= l[0] %>" rows="9" maxlength="3000"><%= content.about_text[l[0]] %></textarea>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="ct-adv">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title" id="ct-adv">Afzalliklar</h2>
+        <p class="hint">«Nega aynan Pro Teach?» bo'limidagi kartochkalar (<%= maxAdvantages %> tagacha).</p>
+      </div>
+    </div>
+    <ul class="adv-list" data-repeat="adv" data-max="<%= maxAdvantages %>">
+      <% content.advantages.forEach(function (a) { %>
+      <%- include('partials/advantage-row', { a: a, icons: icons, iconLabels: iconLabels, langs: langs }) %>
+      <% }) %>
+    </ul>
+    <button class="btn btn-light btn-sm" type="button" data-repeat-add="adv"><%- h.icon('plus') %> Afzallik qo'shish</button>
+    <template data-repeat-template="adv">
+      <%- include('partials/advantage-row', { a: { icon: 'sparkles', title: { uz: '', ru: '', en: '' }, text: { uz: '', ru: '', en: '' } }, icons: icons, iconLabels: iconLabels, langs: langs }) %>
+    </template>
+  </section>
+
+  <div class="form-bar">
+    <a class="btn btn-light" href="/uz/" target="_blank" rel="noopener"><%- h.icon('external') %> Saytni ochish</a>
+    <button class="btn btn-primary" type="submit"><%- h.icon('check') %> Saqlash</button>
+  </div>
+</form>
+
+<%- include('partials/bottom') %>

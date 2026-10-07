@@ -1,0 +1,128 @@
+<%- include('../partials/top') %>
+<% var langs = [['uz', "O'zbekcha"], ['ru', 'Ruscha'], ['en', 'Inglizcha']]; %>
+<% function err(k) { return errors[k] ? '<p class="field-error">' + h.escapeHtml(errors[k]) + '</p>' : ''; } %>
+
+<div class="page-head">
+  <div>
+    <a class="back-link" href="/admin/courses"><%- h.icon('arrow-left') %> Kurslar</a>
+    <h1 class="page-title"><%= course.id ? course.name.uz : 'Yangi kurs' %></h1>
+    <p class="muted">Matnlarni uch tilda kiriting. Ruscha yoki inglizcha bo'sh qolsa, saytda o'zbekchasi ko'rsatiladi.</p>
+  </div>
+  <% if (publicUrl && course.isActive) { %>
+  <div class="page-actions"><a class="btn btn-light" href="<%= publicUrl %>" target="_blank" rel="noopener"><%- h.icon('external') %> Saytda ko'rish</a></div>
+  <% } %>
+</div>
+
+<% if (Object.keys(errors).length) { %>
+<div class="notice notice--error"><%- h.icon('alert') %><span>Formada xatolar bor. Belgilangan maydonlarni tekshiring<%= errors.image ? '' : ' (rasm tanlagan bo\'lsangiz, uni qaytadan tanlang)' %>.</span></div>
+<% } %>
+
+<form method="post" enctype="multipart/form-data" class="course-form"
+  action="<%= course.id ? '/admin/courses/' + course.id : '/admin/courses' %>?_csrf=<%= encodeURIComponent(csrfToken) %>">
+
+  <div class="form-grid">
+    <section class="card" aria-labelledby="t-texts">
+      <div class="card-head">
+        <h2 class="card-title" id="t-texts">Kurs matnlari</h2>
+        <div class="lang-tabs" role="tablist" data-tabs>
+          <% langs.forEach(function (l, i) { %>
+          <% var hasErr = Object.keys(errors).some(function (k) { return k.endsWith('_' + l[0]); }); %>
+          <button type="button" role="tab" id="tab-<%= l[0] %>" aria-controls="panel-<%= l[0] %>" aria-selected="<%= i === 0 ? 'true' : 'false' %>" class="lang-tab<%= hasErr ? ' has-error' : '' %>" data-tab="<%= l[0] %>"><%= l[0].toUpperCase() %></button>
+          <% }) %>
+        </div>
+      </div>
+
+      <% langs.forEach(function (l, i) { var k = l[0]; %>
+      <div class="tab-panel" id="panel-<%= k %>" role="tabpanel" aria-labelledby="tab-<%= k %>" data-panel="<%= k %>">
+        <p class="panel-lang"><%= l[1] %></p>
+        <div class="field">
+          <label for="name_<%= k %>">Kurs nomi<% if (k === 'uz') { %> <span class="req">*</span><% } %></label>
+          <input id="name_<%= k %>" name="name_<%= k %>" type="text" maxlength="100" value="<%= course.name[k] %>" <%- k === 'uz' ? 'required data-slug-source' : '' %>>
+          <%- err('name_' + k) %>
+        </div>
+        <div class="field">
+          <label for="short_<%= k %>">Qisqa tavsif <span class="muted small">(kartochkada, 300 belgigacha)</span></label>
+          <textarea id="short_<%= k %>" name="short_<%= k %>" rows="2" maxlength="300"><%= course.short[k] %></textarea>
+        </div>
+        <div class="field">
+          <label for="description_<%= k %>">To'liq tavsif <span class="muted small">(bo'sh qator — yangi paragraf)</span></label>
+          <textarea id="description_<%= k %>" name="description_<%= k %>" rows="7" maxlength="6000"><%= course.description[k] %></textarea>
+        </div>
+        <div class="field">
+          <label for="learn_<%= k %>">Nimalarni o'rganasiz <span class="muted small">(har bir qator — alohida band)</span></label>
+          <textarea id="learn_<%= k %>" name="learn_<%= k %>" rows="6"><%= (course.learn[k] || []).join('\n') %></textarea>
+        </div>
+        <div class="field">
+          <label for="duration_<%= k %>">Davomiyligi <span class="muted small">(masalan: <%= k === 'uz' ? '4 oy' : k === 'ru' ? '4 месяца' : '4 months' %>)</span></label>
+          <input id="duration_<%= k %>" name="duration_<%= k %>" type="text" maxlength="60" value="<%= course.duration[k] %>">
+        </div>
+      </div>
+      <% }) %>
+    </section>
+
+    <div class="form-side">
+      <section class="card" aria-labelledby="t-main">
+        <h2 class="card-title" id="t-main">Asosiy</h2>
+        <label class="switch-field">
+          <input type="checkbox" name="is_active" value="1"<%- course.isActive ? ' checked' : '' %>>
+          <span class="switch-ui" aria-hidden="true"></span>
+          <span><strong>Faol</strong><span class="muted small">Saytda va yozilish formasida ko'rinadi</span></span>
+        </label>
+        <div class="field">
+          <label for="price">Narxi (so'm)</label>
+          <input id="price" name="price" type="text" inputmode="numeric" placeholder="Bo'sh — «Narxi: bog'laning»" value="<%= course.price || '' %>" data-number>
+          <%- err('price') %>
+        </div>
+        <div class="field">
+          <label for="price_period">Narx turi</label>
+          <select id="price_period" name="price_period">
+            <option value="month"<%- course.pricePeriod === 'month' ? ' selected' : '' %>>Oyiga</option>
+            <option value="course"<%- course.pricePeriod === 'course' ? ' selected' : '' %>>Butun kurs uchun</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="slug">Manzil (slug)</label>
+          <div class="input-prefix"><span>/uz/kurslar/</span><input id="slug" name="slug" type="text" maxlength="100" value="<%= course.slug %>" placeholder="avtomatik" data-slug></div>
+          <p class="hint">Bo'sh qoldirsangiz, nomdan avtomatik yasaladi.</p>
+          <%- err('slug') %>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="t-image">
+        <h2 class="card-title" id="t-image">Rasm</h2>
+        <div class="image-preview" data-image-preview>
+          <% if (imageUrl) { %><img src="<%= imageUrl %>" alt="Joriy rasm" width="600" height="375"><% } else { %><span class="thumb-art thumb-art--lg"><%- h.icon(course.icon) %></span><% } %>
+        </div>
+        <div class="field">
+          <label for="image">Yangi rasm yuklash</label>
+          <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-image-input>
+          <p class="hint">JPG, PNG yoki WEBP, <%= maxImageMb %> MB gacha. Avtomatik 16:10 nisbatda kesiladi va siqiladi.</p>
+          <%- err('image') %>
+        </div>
+        <% if (course.image) { %>
+        <label class="check"><input type="checkbox" name="remove_image" value="1"> Rasmni o'chirish (belgi ko'rsatiladi)</label>
+        <% } %>
+      </section>
+
+      <section class="card" aria-labelledby="t-icon">
+        <h2 class="card-title" id="t-icon">Belgi</h2>
+        <p class="hint">Rasm bo'lmasa, kartochkada shu belgi ko'rsatiladi.</p>
+        <div class="icon-picker">
+          <% icons.forEach(function (ic) { %>
+          <label class="icon-option" title="<%= iconLabels[ic] || ic %>">
+            <input type="radio" name="icon" value="<%= ic %>"<%- course.icon === ic ? ' checked' : '' %>>
+            <span><%- h.icon(ic) %><span class="sr-only"><%= iconLabels[ic] || ic %></span></span>
+          </label>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="form-bar">
+    <a class="btn btn-light" href="/admin/courses">Bekor qilish</a>
+    <button class="btn btn-primary" type="submit"><%- h.icon('check') %> Saqlash</button>
+  </div>
+</form>
+
+<%- include('../partials/bottom') %>

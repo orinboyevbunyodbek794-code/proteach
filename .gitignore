@@ -1,0 +1,26 @@
+# Bog'liqliklar
+node_modules/
+
+# Sozlamalar va maxfiy kalitlar
+.env
+.env.*
+!.env.example
+
+# Ma'lumotlar bazasi (SQLite) va zaxira nusxalar
+data/
+backups/
+*.db
+*.db-wal
+*.db-shm
+
+# Yuklangan fayllar (video, rasmlar)
+uploads/
+
+# Loglar va tizim fayllari
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
