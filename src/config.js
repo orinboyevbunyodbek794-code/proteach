@@ -1,14 +1,16 @@
 /**
- * Barcha sozlamalar .env faylidan o'qiladi. Namuna: .env.example
+ * Barcha sozlamalar .env faylidan (Netlify'da — sayt Environment variables bo'limidan) o'qiladi.
+ * Namuna: .env.example
  */
 'use strict';
 
 const path = require('path');
 const crypto = require('crypto');
+const runtime = require('./runtime');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
 const ROOT = path.join(__dirname, '..');
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || (runtime.isNetlify ? 'production' : 'development');
 const isProd = env === 'production';
 
 function int(name, def) {
@@ -23,12 +25,16 @@ function resolveDir(value, def) {
 
 let sessionSecret = (process.env.SESSION_SECRET || '').trim();
 if (!sessionSecret || sessionSecret.length < 32) {
-  if (isProd) {
+  if (runtime.isNetlify) {
+    // Netlify'da kalit berilmasa, birinchi ishga tushishda bazada yaratiladi (src/db/netlify-db.js)
+    sessionSecret = '';
+  } else if (isProd) {
     throw new Error('SESSION_SECRET .env faylida kamida 32 belgidan iborat bo\'lishi shart (production rejimi).');
+  } else {
+    // Dev rejimida vaqtinchalik kalit: server qayta ishga tushganda sessiyalar bekor bo'ladi
+    sessionSecret = crypto.randomBytes(32).toString('hex');
+    console.warn('[config] SESSION_SECRET berilmagan — vaqtinchalik kalit ishlatilmoqda (faqat dev uchun).');
   }
-  // Dev rejimida vaqtinchalik kalit: server qayta ishga tushganda sessiyalar bekor bo'ladi
-  sessionSecret = crypto.randomBytes(32).toString('hex');
-  console.warn('[config] SESSION_SECRET berilmagan — vaqtinchalik kalit ishlatilmoqda (faqat dev uchun).');
 }
 
 function cookieSecure() {
@@ -39,11 +45,16 @@ function cookieSecure() {
 }
 
 function trustProxy() {
+  // Netlify funksiyasida so'rov bitta "proksi" (bizning ko'prik) orqali keladi
+  if (runtime.isNetlify) return 1;
   const v = (process.env.TRUST_PROXY || 'loopback').trim();
   if (v === 'false' || v === '0') return false;
   if (/^\d+$/.test(v)) return parseInt(v, 10);
   return v; // masalan: loopback, "loopback, 10.0.0.1"
 }
+
+// Netlify o'zi URL (asosiy domen) o'zgaruvchisini beradi
+const siteUrl = process.env.SITE_URL || (runtime.isNetlify ? process.env.URL : '') || 'http://localhost:3000';
 
 module.exports = {
   root: ROOT,
@@ -51,7 +62,7 @@ module.exports = {
   isProd,
   host: process.env.HOST || '0.0.0.0',
   port: int('PORT', 3000),
-  siteUrl: (process.env.SITE_URL || 'http://localhost:3000').replace(/\/+$/, ''),
+  siteUrl: siteUrl.replace(/\/+$/, ''),
   sessionSecret,
   sessionMaxAgeHours: int('SESSION_MAX_AGE_HOURS', 8),
   cookieSecure: cookieSecure(),
@@ -59,7 +70,8 @@ module.exports = {
   adminUsername: (process.env.ADMIN_USERNAME || 'admin').trim(),
   adminPassword: process.env.ADMIN_PASSWORD || '',
   maxVideoMb: int('MAX_VIDEO_MB', 200),
-  maxImageMb: int('MAX_IMAGE_MB', 8),
+  // Netlify funksiyasiga so'rov ~6 MB bilan cheklangan (base64 bilan) — rasm 4 MB gacha
+  maxImageMb: runtime.isNetlify ? Math.min(int('MAX_IMAGE_MB', 4), 4) : int('MAX_IMAGE_MB', 8),
   telegram: {
     token: (process.env.TELEGRAM_BOT_TOKEN || '').trim(),
     chatId: (process.env.TELEGRAM_CHAT_ID || '').trim(),

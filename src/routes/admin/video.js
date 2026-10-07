@@ -5,6 +5,7 @@
 
 const express = require('express');
 const config = require('../../config');
+const runtime = require('../../runtime');
 const log = require('../../logger');
 const settings = require('../../services/settings');
 const media = require('../../services/media');
@@ -27,12 +28,34 @@ router.get('/', (req, res) => {
     video,
     videoUrl: media.urls.video(video.file),
     posterUrl: media.urls.poster(video.poster),
+    youtubeWatch: media.urls.youtubeWatch(video.youtube),
+    youtubePreview: video.youtube ? `https://www.youtube-nocookie.com/embed/${video.youtube}?rel=0` : '',
+    uploadEnabled: runtime.videoUploadEnabled,
     maxVideoMb: config.maxVideoMb,
     maxImageMb: config.maxImageMb,
   });
 });
 
-router.post('/upload', videoUpload, async (req, res, next) => {
+// Netlify'da katta fayl yuklab bo'lmaydi — so'rov multer'ga yetib bormasdan to'xtatiladi
+function uploadAllowed(req, res, next) {
+  if (runtime.videoUploadEnabled) return next();
+  return reply(req, res, false, "Bu hostingda video fayl yuklab bo'lmaydi. YouTube havolasidan foydalaning.");
+}
+
+router.post('/youtube', (req, res) => {
+  const raw = String(req.body.youtube || '').trim();
+  if (!raw) {
+    settings.saveVideo({ youtube: '' });
+    return reply(req, res, true, "YouTube havolasi olib tashlandi.");
+  }
+  const id = media.youtubeId(raw);
+  if (!id) return reply(req, res, false, "YouTube havolasi noto'g'ri. Masalan: https://www.youtube.com/watch?v=XXXXXXXXXXX yoki https://youtu.be/XXXXXXXXXXX");
+  settings.saveVideo({ youtube: id, visible: true });
+  log.info(`YouTube video o'rnatildi: ${id} — ${req.admin.username}`);
+  reply(req, res, true, "YouTube video saqlandi va saytda ko'rsatiladi.");
+});
+
+router.post('/upload', uploadAllowed, videoUpload, async (req, res, next) => {
   try {
     if (req.uploadError) return reply(req, res, false, req.uploadError);
     if (!req.file) return reply(req, res, false, 'Video fayl tanlanmadi.');
@@ -78,7 +101,7 @@ router.post('/visibility', (req, res) => {
 
 router.post('/delete', async (req, res) => {
   const video = settings.getVideo();
-  settings.saveVideo({ file: '', mime: '', size: 0, uploadedAt: '' });
+  settings.saveVideo({ youtube: '', file: '', mime: '', size: 0, uploadedAt: '' });
   if (video.file) await media.deleteVideoAsset(video.file);
   reply(req, res, true, "Video o'chirildi. Saytdagi video bo'limi endi ko'rinmaydi.");
 });

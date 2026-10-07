@@ -12,7 +12,12 @@ const { createApp } = require('./src/app');
 initDatabase();
 const app = createApp();
 
-const server = app.listen(config.port, config.host, () => {
+const server = app.listen(config.port, config.host, (err) => {
+  // Express 5: port band bo'lsa va hokazo — xato shu yerga keladi
+  if (err) {
+    log.error(`Serverni ishga tushirib bo'lmadi (${config.host}:${config.port}): ${err.code || ''} ${err.message}`);
+    process.exit(1);
+  }
   log.info(`Pro Teach ishga tushdi: http://${config.host === '0.0.0.0' ? 'localhost' : config.host}:${config.port} (${config.env})`);
 });
 

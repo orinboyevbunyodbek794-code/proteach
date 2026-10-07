@@ -1,20 +1,24 @@
 /**
- * SQLite ulanishi (better-sqlite3) va migratsiyalar.
+ * SQLite ulanishi va migratsiyalar.
+ *   server  rejimi: better-sqlite3, data/proteach.db fayli
+ *   netlify rejimi: sql.js (WebAssembly) + Netlify Blobs (src/db/netlify-db.js)
  * Barcha so'rovlar parametrlashtirilgan (prepared statements) — SQL inyeksiyadan himoya.
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
-const Database = require('better-sqlite3');
 const config = require('../config');
 const log = require('../logger');
+const runtime = require('../runtime');
 const migrations = require('./migrations');
 
 let db = null;
 
 function getDb() {
+  if (runtime.isNetlify) return require('./netlify-db').current();
   if (!db) {
+    const Database = require('better-sqlite3');
     fs.mkdirSync(path.dirname(config.dbFile), { recursive: true });
     db = new Database(config.dbFile);
     db.pragma('journal_mode = WAL');
@@ -38,7 +42,7 @@ function migrate() {
   }
 }
 
-/** Server ishga tushganda chaqiriladi: jadvallar, birinchi admin va boshlang'ich ma'lumotlar. */
+/** Server rejimida ishga tushganda: jadvallar, birinchi admin va boshlang'ich ma'lumotlar. */
 function initDatabase() {
   migrate();
   require('../services/admins').ensureFirstAdmin();

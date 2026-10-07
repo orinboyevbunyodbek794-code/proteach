@@ -80,6 +80,15 @@ module.exports = [
       CREATE INDEX idx_sessions_expires ON sessions (expires);
     `,
   },
+  {
+    version: 2,
+    name: 'cookie sessiyalar (Netlify bilan mos)',
+    sql: `
+      -- Sessiya endi imzolangan cookie'da; parol almashtirilganda versiya oshadi va eski sessiyalar bekor bo'ladi
+      ALTER TABLE admins ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1;
+      DROP TABLE IF EXISTS sessions;
+    `,
+  },
 ];
 
 /*

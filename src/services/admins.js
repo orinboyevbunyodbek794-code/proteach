@@ -4,7 +4,15 @@
 'use strict';
 
 const crypto = require('crypto');
-const bcrypt = require('bcrypt');
+const runtime = require('../runtime');
+
+// Native bcrypt yuklanmasa (masalan, serverless muhitda) — bir xil xesh beradigan bcryptjs
+let bcrypt;
+try {
+  bcrypt = require('bcrypt');
+} catch {
+  bcrypt = require('bcryptjs');
+}
 const { getDb } = require('../db');
 const config = require('../config');
 const log = require('../logger');
@@ -29,7 +37,14 @@ function list() {
 }
 
 function findById(id) {
-  return getDb().prepare('SELECT id, username, created_at, last_login_at FROM admins WHERE id = ?').get(id) || null;
+  return getDb().prepare('SELECT id, username, created_at, last_login_at, session_version FROM admins WHERE id = ?').get(id) || null;
+}
+
+/** Barcha mavjud sessiyalarni bekor qilish (parol almashtirilganda). Yangi versiyani qaytaradi. */
+function bumpSessionVersion(id) {
+  getDb().prepare('UPDATE admins SET session_version = session_version + 1 WHERE id = ?').run(id);
+  const row = findById(id);
+  return row ? row.session_version : null;
 }
 
 function validateUsername(username) {
@@ -85,6 +100,11 @@ function ensureFirstAdmin() {
     username = 'admin';
   }
   if (!validatePassword(password)) {
+    if (runtime.isNetlify) {
+      // Sayt ishlayveradi; admin Netlify'da ADMIN_PASSWORD kiritilib, qayta deploy qilingach yaratiladi
+      log.warn("ADMIN_PASSWORD o'rnatilmagan — administrator hali yaratilmadi (Netlify > Environment variables).");
+      return;
+    }
     if (config.isProd) {
       throw new Error(`ADMIN_PASSWORD .env faylida kamida ${MIN_PASSWORD} belgidan iborat bo'lishi shart.`);
     }
@@ -108,5 +128,6 @@ module.exports = {
   exists,
   changePassword,
   remove,
+  bumpSessionVersion,
   ensureFirstAdmin,
 };

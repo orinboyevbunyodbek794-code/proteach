@@ -503,6 +503,8 @@ a.stat-card:hover { border-color: var(--ink); transform: translateY(-2px); box-s
 .video-admin-grid > .card { margin: 0; }
 .video-preview { overflow: hidden; border-radius: 12px; background: #000; aspect-ratio: 16 / 9; }
 .video-preview video { width: 100%; height: 100%; object-fit: contain; }
+.video-preview iframe { width: 100%; height: 100%; border: 0; }
+.meta-list dd .link { word-break: break-all; }
 .meta-list { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 16px; }
 .meta-list dt { font-size: 12px; font-weight: 700; color: var(--muted); }
 .meta-list dd { font-weight: 800; }

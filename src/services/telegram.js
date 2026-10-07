@@ -58,10 +58,15 @@ function applicationMessage(app) {
   return lines.join('\n');
 }
 
-/** Javobni kutmaydi — so'rov darhol qaytadi */
-function notifyNewApplication(app) {
-  if (!isConfigured()) return;
-  send(applicationMessage(app)).catch((err) => log.warn('Telegram xabari yuborilmadi:', err.message));
+/**
+ * Yangi ariza haqida xabar. Hech qachon xato tashlamaydi (Promise doim muvaffaqiyatli tugaydi).
+ * Serverless muhitda javob yuborilgach jarayon to'xtatiladi, shuning uchun chaqiruvchi uni kutadi
+ * (lekin maksimal waitMs — Telegram sekin bo'lsa ham foydalanuvchi uzoq kutmaydi).
+ */
+function notifyNewApplication(app, waitMs = 3500) {
+  if (!isConfigured()) return Promise.resolve();
+  const sending = send(applicationMessage(app)).catch((err) => log.warn('Telegram xabari yuborilmadi:', err.message));
+  return Promise.race([sending, new Promise((r) => setTimeout(r, waitMs))]);
 }
 
 async function sendTest() {

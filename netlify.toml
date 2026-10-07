@@ -1,0 +1,35 @@
+# Pro Teach — Netlify sozlamalari
+#
+# public/          — statik fayllar (CSS, JS, rasmlar, shriftlar) — Netlify CDN beradi
+# netlify/functions/server.mjs — qolgan hamma narsa (sahifalar, admin panel, forma)
+# Ma'lumotlar bazasi va yuklangan rasmlar — Netlify Blobs (alohida sozlash shart emas)
+#
+# Netlify > Site configuration > Environment variables bo'limida kiriting:
+#   ADMIN_USERNAME, ADMIN_PASSWORD  (majburiy — birinchi administrator)
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  (ixtiyoriy)
+#   SITE_URL  (ixtiyoriy — o'z domeningiz bo'lsa, masalan https://proteach.uz)
+
+[build]
+  publish = "public"
+  command = "echo 'Pro Teach: statik fayllar public/ dan, sahifalar Netlify Function orqali'"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  # EJS shablonlari va statik fayl versiyalari (?v=hash) funksiya ichida o'qiladi;
+  # sql.js (WebAssembly), sharp va bcrypt'ning platformaga xos fayllari dinamik yuklanadi
+  included_files = [
+    "views/**",
+    "public/css/**",
+    "public/js/**",
+    "public/img/icons.svg",
+    "node_modules/sql.js/dist/sql-wasm.wasm",
+    "node_modules/@img/**",
+    "node_modules/bcrypt/prebuilds/**",
+  ]
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

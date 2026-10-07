@@ -39,6 +39,7 @@ module.exports = {
     visualAlt: 'Pro Teach tracks: programming, SMM, artificial intelligence, office software',
   },
   video: {
+    play: 'Watch the video',
     label: 'Video',
     title: 'Meet our center',
     text: 'See how our classes work, feel the atmosphere and the results our students achieve.',

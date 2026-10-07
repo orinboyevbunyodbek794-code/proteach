@@ -22,13 +22,18 @@ function safeNext(value) {
 
 function requireAuth(req, res, next) {
   const id = req.session && req.session.adminId;
-  const admin = id ? admins.findById(id) : null;
+  const found = id ? admins.findById(id) : null;
+  // Parol almashtirilgan bo'lsa, eski sessiya versiyasi endi yaroqsiz
+  const admin = found && found.session_version === req.session.ver ? found : null;
   if (admin) {
     req.admin = admin;
     res.locals.admin = admin;
     return next();
   }
-  if (req.session && id) delete req.session.adminId; // o'chirilgan admin sessiyasi
+  if (req.session && id) {
+    delete req.session.adminId; // o'chirilgan admin yoki eskirgan sessiya
+    delete req.session.ver;
+  }
   if (wantsJson(req)) return res.status(401).json({ ok: false, error: 'Sessiya tugagan. Qaytadan kiring.' });
   const nextUrl = req.method === 'GET' ? `?next=${encodeURIComponent(req.originalUrl)}` : '';
   return res.redirect('/admin/login' + nextUrl);

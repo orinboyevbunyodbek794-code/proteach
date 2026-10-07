@@ -94,6 +94,21 @@
     }
   }
 
+  /* --- YouTube video: bosilganda pleerni yuklash (ungacha faqat rasm) --- */
+  $$('[data-yt-embed]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var iframe = doc.createElement('iframe');
+      iframe.src = link.getAttribute('data-yt-embed');
+      iframe.title = link.getAttribute('data-yt-title') || 'YouTube';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      link.replaceWith(iframe);
+      iframe.focus();
+    });
+  });
+
   /* --- Telefon maskasi: +998 90 123 45 67 --- */
   function formatPhone(value) {
     var d = String(value).replace(/\D/g, '');

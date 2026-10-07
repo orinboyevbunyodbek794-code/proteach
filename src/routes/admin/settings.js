@@ -8,7 +8,6 @@ const config = require('../../config');
 const log = require('../../logger');
 const admins = require('../../services/admins');
 const telegram = require('../../services/telegram');
-const { destroyAdminSessions } = require('../../db/session-store');
 const v = require('../../utils/validate');
 
 const router = express.Router();
@@ -48,7 +47,8 @@ router.post('/password', async (req, res, next) => {
       req.flash('error', 'Yangi parol joriy paroldan farq qilishi kerak.');
     } else {
       await admins.changePassword(req.admin.id, next1);
-      destroyAdminSessions(req.admin.id, req.sessionID); // boshqa qurilmalardagi sessiyalar yopiladi
+      // Boshqa qurilmalardagi sessiyalar yopiladi, joriy sessiya yangi versiyaga o'tadi
+      req.session.ver = admins.bumpSessionVersion(req.admin.id);
       log.info(`Parol o'zgartirildi: ${req.admin.username}`);
       req.flash('success', "Parol muvaffaqiyatli o'zgartirildi. Boshqa qurilmalardagi sessiyalar yopildi.");
     }
@@ -91,8 +91,7 @@ router.post('/admins/:id/delete', (req, res) => {
   } else if (admins.count() <= 1) {
     req.flash('error', "Oxirgi administratorni o'chirib bo'lmaydi.");
   } else {
-    admins.remove(target.id);
-    destroyAdminSessions(target.id);
+    admins.remove(target.id); // uning sessiyalari avtomatik yaroqsiz bo'ladi
     log.info(`Admin o'chirildi: ${target.username} — ${req.admin.username}`);
     req.flash('success', `"${target.username}" o'chirildi.`);
   }

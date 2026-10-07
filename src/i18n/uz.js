@@ -39,6 +39,7 @@ module.exports = {
     visualAlt: 'Pro Teach yoʻnalishlari: dasturlash, SMM, sunʼiy intellekt, ofis dasturlari',
   },
   video: {
+    play: 'Videoni koʻrish',
     label: 'Video',
     title: 'Markaz bilan tanishing',
     text: 'Darslarimiz qanday oʻtishini, muhit va oʻquvchilarimiz natijalarini oʻz koʻzingiz bilan koʻring.',

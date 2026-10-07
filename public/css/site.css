@@ -358,6 +358,19 @@ button { font: inherit; }
   box-shadow: 8px 8px 0 var(--amber), 0 30px 60px -30px rgba(13, 13, 15, .5);
 }
 .video-frame video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.video-frame iframe { width: 100%; height: 100%; border: 0; }
+.yt-facade { position: relative; display: block; width: 100%; height: 100%; color: #fff; text-decoration: none; }
+.yt-facade img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease), opacity .3s; }
+.yt-facade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(13, 13, 15, .55), rgba(13, 13, 15, .05) 60%); }
+.yt-play {
+  position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%, -50%);
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px 14px 18px; border-radius: 999px;
+  background: var(--amber); color: var(--ink); font-weight: 800; font-size: 15px;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .6); transition: transform .25s var(--ease);
+}
+.yt-play .icon { width: 20px; height: 20px; fill: currentColor; }
+.yt-facade:hover img { transform: scale(1.03); }
+.yt-facade:hover .yt-play, .yt-facade:focus-visible .yt-play { transform: translate(-50%, -50%) scale(1.06); }
 @media (min-width: 960px) {
   .video-grid { grid-template-columns: .78fr 1.22fr; gap: 64px; align-items: center; }
   .video-grid .section-head { margin: 0; }

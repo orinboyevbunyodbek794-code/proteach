@@ -5,6 +5,7 @@
 
 const express = require('express');
 const config = require('../config');
+const runtime = require('../runtime');
 const log = require('../logger');
 const { LANGS, DEFAULT_LANG, COURSE_SEGMENT, isLang, translator, pick, homePath, coursePath } = require('../i18n');
 const settings = require('../services/settings');
@@ -37,7 +38,16 @@ function useLang(lang) {
 
 function videoData() {
   const video = settings.getVideo();
-  if (!video.file || !video.visible) return null;
+  if (!video.visible) return null;
+  if (video.youtube) {
+    return {
+      youtube: video.youtube,
+      embed: urls.youtubeEmbed(video.youtube),
+      watch: urls.youtubeWatch(video.youtube),
+      poster: urls.poster(video.poster) || urls.youtubeThumb(video.youtube),
+    };
+  }
+  if (!video.file || !runtime.videoUploadEnabled) return null;
   return { url: urls.video(video.file), mime: video.mime, poster: urls.poster(video.poster) };
 }
 
@@ -141,7 +151,7 @@ for (const lang of LANGS) {
   }
 
   // Ariza yuborish
-  router.post(`/${lang}/apply`, setLang, applyLimiter, (req, res) => {
+  router.post(`/${lang}/apply`, setLang, applyLimiter, async (req, res) => {
     const t = res.locals.t;
     const isFetch = req.get('x-requested-with') === 'fetch';
     const body = req.body || {};
@@ -187,7 +197,7 @@ for (const lang of LANGS) {
         comment,
         lang,
       });
-      telegram.notifyNewApplication(app);
+      await telegram.notifyNewApplication(app);
       return success();
     } catch (err) {
       log.error('Arizani saqlashda xato', err);

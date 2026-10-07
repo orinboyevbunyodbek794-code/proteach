@@ -4,6 +4,8 @@
 'use strict';
 
 const log = require('../logger');
+const { helpers } = require('../middleware/locals');
+const config = require('../config');
 const { isLang, DEFAULT_LANG, translator } = require('../i18n');
 
 /** URL dagi birinchi segment, keyin cookie, bo'lmasa o'zbekcha */
@@ -27,6 +29,9 @@ function renderPublicError(req, res, status) {
     const { baseContext } = require('./context');
     const ctx = baseContext(lang);
     const data = {
+      h: helpers,
+      siteUrl: config.siteUrl,
+      csrfToken: res.locals.csrfToken || '',
       ...ctx,
       page: 'error',
       code,
@@ -48,7 +53,7 @@ const ADMIN_MESSAGES = {
 
 function renderAdminError(req, res, status) {
   const [title, text] = ADMIN_MESSAGES[status] || ADMIN_MESSAGES[status >= 500 ? 500 : 404];
-  res.status(status).render('admin/error', { title, text, code: status }, (err, html) => {
+  res.status(status).render('admin/error', { h: helpers, title, text, code: status }, (err, html) => {
     if (!err) return res.send(html);
     log.error("Admin xato sahifasini chiqarib bo'lmadi", err);
     res.type('text/plain; charset=utf-8').send(`${status} — ${title}`);

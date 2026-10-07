@@ -49,10 +49,18 @@
         <p class="section-lead"><%= t('video.text') %></p>
       </div>
       <div class="video-frame" data-reveal>
+        <% if (video.youtube) { %>
+        <%# YouTube: avval faqat rasm yuklanadi, bosilganda pleer ochiladi (sahifa tez yuklanadi) %>
+        <a class="yt-facade" href="<%= video.watch %>" target="_blank" rel="noopener" data-yt-embed="<%= video.embed %>" data-yt-title="<%= t('video.title') %>">
+          <img src="<%= video.poster %>" alt="" width="1280" height="720" loading="lazy" decoding="async">
+          <span class="yt-play"><%- h.icon('play') %><span><%= t('video.play') %></span></span>
+        </a>
+        <% } else { %>
         <video controls preload="metadata" playsinline width="1280" height="720"<% if (video.poster) { %> poster="<%= video.poster %>"<% } %>>
           <source src="<%= video.url %>" type="<%= video.mime || 'video/mp4' %>">
           <p><%= t('video.unsupported') %></p>
         </video>
+        <% } %>
       </div>
     </div>
   </section>

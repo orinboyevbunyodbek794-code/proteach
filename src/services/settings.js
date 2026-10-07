@@ -54,7 +54,8 @@ function saveContacts(contacts) {
   set('contacts', { ...CONTACT_DEFAULTS, ...contacts });
 }
 
-const VIDEO_DEFAULTS = { file: '', mime: '', size: 0, poster: '', visible: true, uploadedAt: '' };
+// youtube — YouTube video ID; file — serverga yuklangan video (faqat server rejimida). YouTube ustun turadi.
+const VIDEO_DEFAULTS = { youtube: '', file: '', mime: '', size: 0, poster: '', visible: true, uploadedAt: '' };
 
 function getVideo() {
   return { ...VIDEO_DEFAULTS, ...(get('video', {}) || {}) };

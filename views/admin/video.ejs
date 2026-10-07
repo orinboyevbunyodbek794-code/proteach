@@ -1,9 +1,10 @@
 <%- include('partials/top') %>
+<% var hasVideo = !!(video.youtube || (uploadEnabled && video.file)); %>
 
 <div class="page-head">
   <div>
     <h1 class="page-title">Video</h1>
-    <p class="muted">O'quv markazi haqidagi video bosh sahifadagi «Markaz bilan tanishing» bo'limida chiqadi. Video yuklanmagan yoki yashirilgan bo'lsa, bo'lim ko'rinmaydi.</p>
+    <p class="muted">O'quv markazi haqidagi video bosh sahifadagi «Markaz bilan tanishing» bo'limida chiqadi. Video qo'shilmagan yoki yashirilgan bo'lsa, bo'lim ko'rinmaydi.</p>
   </div>
 </div>
 
@@ -11,11 +12,19 @@
   <section class="card" aria-labelledby="v-current">
     <div class="card-head">
       <h2 class="card-title" id="v-current">Joriy video</h2>
-      <% if (video.file) { %>
+      <% if (hasVideo) { %>
       <span class="status <%= video.visible ? 'status--accepted' : 'status--rejected' %>"><%= video.visible ? "Saytda ko'rinadi" : 'Yashirilgan' %></span>
       <% } %>
     </div>
-    <% if (video.file) { %>
+    <% if (video.youtube) { %>
+    <div class="video-preview">
+      <iframe src="<%= youtubePreview %>" title="YouTube video ko'rinishi" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <dl class="meta-list">
+      <div><dt>Manba</dt><dd>YouTube</dd></div>
+      <div><dt>Havola</dt><dd><a class="link" href="<%= youtubeWatch %>" target="_blank" rel="noopener"><%= youtubeWatch %></a></dd></div>
+    </dl>
+    <% } else if (uploadEnabled && video.file) { %>
     <div class="video-preview">
       <video controls preload="metadata" playsinline<% if (posterUrl) { %> poster="<%= posterUrl %>"<% } %>>
         <source src="<%= videoUrl %>" type="<%= video.mime %>">
@@ -26,6 +35,10 @@
       <div><dt>Hajmi</dt><dd><%= (video.size / 1048576).toFixed(1) %> MB</dd></div>
       <% if (video.uploadedAt) { %><div><dt>Yuklangan</dt><dd><%= h.formatDateTime(video.uploadedAt) %></dd></div><% } %>
     </dl>
+    <% } else { %>
+    <div class="empty"><%- h.icon('video') %><p>Video hali qo'shilmagan. Saytda video bo'limi ko'rinmaydi.</p></div>
+    <% } %>
+    <% if (hasVideo) { %>
     <div class="row-actions">
       <form method="post" action="/admin/video/visibility">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -34,19 +47,34 @@
           <%- h.icon(video.visible ? 'eye-off' : 'eye') %> <%= video.visible ? 'Saytdan yashirish' : "Saytda ko'rsatish" %>
         </button>
       </form>
-      <form method="post" action="/admin/video/delete" data-confirm="Video butunlay o'chiriladi va saytdagi video bo'limi yo'qoladi.">
+      <form method="post" action="/admin/video/delete" data-confirm="Video saytdan olib tashlanadi va video bo'limi yo'qoladi.">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="btn btn-danger-ghost" type="submit"><%- h.icon('trash') %> Videoni o'chirish</button>
+        <button class="btn btn-danger-ghost" type="submit"><%- h.icon('trash') %> Videoni olib tashlash</button>
       </form>
     </div>
-    <% } else { %>
-    <div class="empty"><%- h.icon('video') %><p>Video hali yuklanmagan. Saytda video bo'limi ko'rinmaydi.</p></div>
     <% } %>
   </section>
 
   <div class="stack">
+    <section class="card" aria-labelledby="v-youtube">
+      <h2 class="card-title" id="v-youtube"><%- h.icon('youtube') %> YouTube havolasi</h2>
+      <p class="hint">Videoni YouTube'ga yuklang (xohlasangiz «Ro'yxatda yo'q / Unlisted» qilib), so'ng havolasini shu yerga qo'ying.
+        Saytda avval faqat muqova rasmi ko'rinadi, pleer bosilganda yuklanadi — sahifa tez ochiladi.</p>
+      <form method="post" action="/admin/video/youtube" class="form-stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="field">
+          <label for="youtube">Video havolasi</label>
+          <input id="youtube" name="youtube" type="url" maxlength="300" value="<%= youtubeWatch %>" placeholder="https://www.youtube.com/watch?v=... yoki https://youtu.be/...">
+          <p class="hint">Bo'sh qoldirib saqlasangiz, YouTube video olib tashlanadi.</p>
+        </div>
+        <div class="row-actions"><button class="btn btn-primary" type="submit"><%- h.icon('check') %> Saqlash</button></div>
+      </form>
+    </section>
+
+    <% if (uploadEnabled) { %>
     <section class="card" aria-labelledby="v-upload">
-      <h2 class="card-title" id="v-upload"><%= video.file ? 'Videoni almashtirish' : 'Video yuklash' %></h2>
+      <h2 class="card-title" id="v-upload"><%= video.file ? 'Video faylni almashtirish' : 'Video fayl yuklash' %></h2>
+      <p class="hint">YouTube havolasi kiritilgan bo'lsa, saytda YouTube video ko'rsatiladi.</p>
       <form method="post" enctype="multipart/form-data" action="/admin/video/upload?_csrf=<%= encodeURIComponent(csrfToken) %>" data-video-upload data-max-mb="<%= maxVideoMb %>">
         <label class="dropzone" data-dropzone>
           <input type="file" name="video" accept="video/mp4,video/webm,.mp4,.webm,.m4v" required data-video-input>
@@ -66,16 +94,17 @@
         <p class="hint">Maslahat: tez yuklanishi uchun videoni 1080p yoki 720p sifatda, H.264 (MP4) formatida tayyorlang.</p>
       </form>
     </section>
+    <% } %>
 
     <section class="card" aria-labelledby="v-poster">
-      <h2 class="card-title" id="v-poster">Poster rasm <span class="muted small">(ixtiyoriy)</span></h2>
-      <p class="hint">Video boshlanishidan oldin ko'rinadigan muqova rasmi.</p>
+      <h2 class="card-title" id="v-poster">Muqova rasmi <span class="muted small">(ixtiyoriy)</span></h2>
+      <p class="hint">Video boshlanishidan oldin ko'rinadigan rasm. Yuklanmasa, YouTube'ning o'z muqovasi ishlatiladi.</p>
       <% if (posterUrl) { %>
-      <div class="poster-preview"><img src="<%= posterUrl %>" alt="Joriy poster" loading="lazy"></div>
+      <div class="poster-preview"><img src="<%= posterUrl %>" alt="Joriy muqova" loading="lazy"></div>
       <% } %>
       <form method="post" enctype="multipart/form-data" action="/admin/video/poster?_csrf=<%= encodeURIComponent(csrfToken) %>" class="form-stack">
         <div class="field">
-          <label for="poster"><%= posterUrl ? 'Posterni almashtirish' : 'Poster yuklash' %></label>
+          <label for="poster"><%= posterUrl ? 'Muqovani almashtirish' : 'Muqova yuklash' %></label>
           <input id="poster" type="file" name="poster" accept="image/jpeg,image/png,image/webp" required>
           <p class="hint">JPG, PNG yoki WEBP, <%= maxImageMb %> MB gacha. Tavsiya: 1280×720.</p>
         </div>
@@ -84,9 +113,9 @@
         </div>
       </form>
       <% if (posterUrl) { %>
-      <form method="post" action="/admin/video/poster/delete" data-confirm="Poster rasmi o'chiriladi.">
+      <form method="post" action="/admin/video/poster/delete" data-confirm="Muqova rasmi o'chiriladi.">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button class="btn btn-danger-ghost btn-sm" type="submit"><%- h.icon('trash') %> Posterni o'chirish</button>
+        <button class="btn btn-danger-ghost btn-sm" type="submit"><%- h.icon('trash') %> Muqovani o'chirish</button>
       </form>
       <% } %>
     </section>
