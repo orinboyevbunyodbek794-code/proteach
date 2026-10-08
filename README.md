@@ -165,6 +165,36 @@ crontab -e
 
 Tiklash: `pm2 stop proteach` → zaxira faylni `data/proteach.db` o'rniga ko'chiring (`-wal`, `-shm` fayllarini o'chiring) → `pm2 start proteach`.
 
+## Netlify'ga joylash (bepul)
+
+Loyiha Netlify'da ham to'liq ishlaydi — alohida server va baza kerak emas:
+
+- `public/` — statik fayllar (CSS, JS, rasmlar), Netlify CDN beradi
+- `netlify/functions/server.js` — sahifalar, admin panel, forma (Netlify Function)
+- Ma'lumotlar bazasi (SQLite fayli) va yuklangan rasmlar — **Netlify Blobs**da saqlanadi (avtomatik)
+
+Sozlash:
+
+1. Loyihani GitHub'ga yuklang va Netlify'da **Add new project → Import from Git** orqali ulang.
+   Build sozlamalari `netlify.toml` dan o'qiladi — hech narsa o'zgartirish shart emas.
+2. Netlify → **Site configuration → Environment variables** bo'limida kiriting:
+   - `ADMIN_USERNAME` — masalan `admin`
+   - `ADMIN_PASSWORD` — kamida 8 belgili kuchli parol (birinchi administrator shu bilan yaratiladi)
+   - ixtiyoriy: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, o'z domeningiz bo'lsa `SITE_URL=https://proteach.uz`
+3. **Deploys → Trigger deploy → Deploy site**. Tayyor: sayt `https://<nom>.netlify.app`, admin — `/admin`.
+
+Netlify'dagi farqlar:
+
+| | Oddiy server (VPS) | Netlify |
+|---|---|---|
+| Video | Fayl yuklash (200 MB gacha) yoki YouTube | Faqat **YouTube havolasi** (funksiyaga so'rov ~6 MB bilan cheklangan) |
+| Rasm hajmi | 8 MB gacha | 4 MB gacha |
+| Baza | `data/proteach.db` | Netlify Blobs (`proteach` ombori) |
+| Zaxira | `npm run backup` | Netlify → **Blobs** bo'limidan `db/proteach.sqlite` ni yuklab olish |
+
+> Bir vaqtda kelgan arizalar yo'qolmaydi: baza shartli yoziladi (ETag), ikki nusxa bir vaqtda yozsa,
+> keyingisi eng yangi versiyani olib, o'z o'zgarishini uning ustida qayta bajaradi.
+
 ## VPS ga joylash (Ubuntu 22.04 / 24.04)
 
 ### 1. Node.js va PM2

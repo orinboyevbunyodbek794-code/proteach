@@ -4,12 +4,29 @@
  */
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const runtime = require('./runtime');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
-const ROOT = path.join(__dirname, '..');
+/**
+ * Loyiha ildizi (views/ va public/ joylashgan papka).
+ * Netlify funksiyasi bitta faylga yig'ilganda __dirname o'zgaradi — shuning uchun
+ * yuqoriga qarab views/ papkasi bor joyni qidiramiz.
+ */
+function findRoot() {
+  const candidates = [];
+  for (let dir = __dirname; ; dir = path.dirname(dir)) {
+    candidates.push(dir);
+    if (path.dirname(dir) === dir) break;
+  }
+  if (process.env.LAMBDA_TASK_ROOT) candidates.push(process.env.LAMBDA_TASK_ROOT);
+  candidates.push(process.cwd());
+  return candidates.find((d) => fs.existsSync(path.join(d, 'views', 'public', 'home.ejs'))) || path.join(__dirname, '..');
+}
+
+const ROOT = findRoot();
+require('dotenv').config({ path: path.join(ROOT, '.env'), quiet: true });
 const env = process.env.NODE_ENV || (runtime.isNetlify ? 'production' : 'development');
 const isProd = env === 'production';
 
